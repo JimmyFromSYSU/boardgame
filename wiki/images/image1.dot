@@ -1,0 +1,78 @@
+digraph G {
+    rankdir = LR;
+    node [style=filled, color=lightblue];
+
+
+    board [label=Board, shape=box]
+    status [label=Status, shape=box]
+    action [label=Action, shape=box]
+    player [label=Player, shape=box]
+    judge [label=Judge, shape=box]
+    game [label=Game, shape=box]
+    /* config [label=Config, shape=box] */
+
+    action -> board
+    status -> board
+    player -> action
+    player -> status
+    judge -> action
+    judge -> status
+    game -> judge
+    game -> player
+    /* game -> status */
+
+    /*
+    node [style=filled, color=lightblue];
+    subgraph cluster_0 {
+		style=filled;
+		color=wheat;
+		node [style=filled];
+		section_01 [label=Section_1, shape=box]
+        section_02 [label=Section_2, shape=box]
+		label = "List of Sections";
+	}
+
+    subgraph cluster_1 {
+		style=filled;
+		color=wheat;
+		node [style=filled];
+		block_01 [label="Block(Text)", shape=box]
+        block_02 [label="Block(Quote)", shape=box]
+        block_03 [label="Block(List)", shape=box]
+        block_04 [label="Block(Code)", shape=box]
+        block_05 [label="Block(Math)", shape=box]
+		label = "List of Blocks";
+	}
+
+    subgraph cluster_2 {
+		style=filled;
+		color=wheat;
+		node [style=filled];
+		line_01 [label=Line_1, shape=box]
+        line_02 [label=Line_2, shape=box]
+		label = "List of Lines";
+	}
+
+    doc [label=Document, shape=box]
+
+    title_01 [label=Title, shape=box]
+    content_01 [label=Content, shape=box]
+
+
+
+    doc -> section_01
+    doc -> section_02
+
+    section_01->title_01
+    section_01->content_01
+
+    content_01 -> block_01
+    content_01 -> block_02
+    content_01 -> block_03
+    content_01 -> block_04
+    content_01 -> block_05
+
+    block_01 -> line_01
+    block_01 -> line_02 */
+
+}
