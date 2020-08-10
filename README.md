@@ -79,6 +79,7 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
 * 基础设施
     * 学习和参照中国象棋标准，制定静态棋盘和动态棋局的文件格式。[UCCI 中国象棋通用引擎协议　版本：3.0](https://www.xqbase.com/protocol/cchess_ucci.htm)
     * 借助latex项目，实现静态棋盘的图片的生成，以及实现动态棋局gif图的生成。
+    * 整理以前写的[Javascript版本的象棋引擎](https://github.com/JimmyFromSYSU/ChineseChess)
 * AI设计
     * 实现AI的自动博弈，并计算每次结局的基本情况和整体胜率。
     * 实现训练框架对评估函数进行训练。

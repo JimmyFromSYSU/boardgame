@@ -15,3 +15,6 @@ image:
 	@echo '需要安装brew install imagemagick'
 	convert -density 300 wiki/images/三角形.pdf -quality 90 wiki/images/三角形.png
 	open wiki/images/三角形.png
+
+git:
+	git push https://github.com/JimmyFromSYSU/boardgame.git master
