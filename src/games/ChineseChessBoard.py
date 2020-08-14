@@ -1,11 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from typing import List, Optional
+from typing import List, Optional, Dict
 from termcolor import colored
 from .structs import Location
 
 from .ChineseChessUtils import ChineseChessSide, ChineseChessType, down
 from .BoardGame import Board
+
+import json
+
 
 # 棋子类
 class ChineseChess():
@@ -104,9 +107,38 @@ class ChineseChessBoard(Board):
             self.init_chess(ChineseChess("红", "兵", "03", side), Location(4, 3))
             self.init_chess(ChineseChess("红", "兵", "04", side), Location(6, 3))
             self.init_chess(ChineseChess("红", "兵", "05", side), Location(8, 3))
+        elif self.config.load_file:
+            self.load(self.config.load_file)
 
         assert len(self.items) > 0, "MUST have at lease 1 chess"
         return True
+
+    def save(self, file_path):
+        chesses = [
+            {
+                'color': item.color,
+                'name': item.name,
+                'number': item.number,
+                'side': item.side.name,
+                'location': self.get_location_dict(item)
+            }
+            for item in self.items.values()
+        ]
+        with open(file_path, 'w+') as outfile:
+            json.dump(chesses, outfile)
+
+    def load(self, file_path):
+        with open(file_path) as json_file:
+            chesses = json.load(json_file)
+        for chess in chesses:
+            color = chess['color']
+            name = chess['name']
+            number = chess['number']
+            side = ChineseChessSide.DOWN if chess['side'] == ChineseChessSide.DOWN.name else ChineseChessSide.UP
+            loc = chess['location']
+            loc = Location(loc['x'], loc['y']) if loc else None
+            self.init_chess(ChineseChess(color, name, number, side), loc)
+
     def get_king_location(self, side: ChineseChessSide) -> Optional[Location]:
         for item in self.items.values():
             if item.type_ == ChineseChessType.JIANG:
@@ -114,10 +146,11 @@ class ChineseChessBoard(Board):
                     return self.get_location(item)
         return None
 
-    def init_chess(self, chess: ChineseChess, location: Location) -> bool:
+    def init_chess(self, chess: ChineseChess, location: Optional[Location]) -> bool:
         id_ = chess.get_id()
         self.items[id_] = chess
-        self.grids[location.y][location.x] = chess
+        if location:
+            self.grids[location.y][location.x] = chess
         self.locations[id_] = location
         return True
 
@@ -145,6 +178,13 @@ class ChineseChessBoard(Board):
 
     def get_location(self, item: ChineseChess) -> Optional[Location]:
         return self.locations[item.get_id()]
+
+    def get_location_dict(self, item: ChineseChess) -> Optional[Dict[str, int]]:
+        loc = self.locations[item.get_id()]
+        if loc is None:
+            return  None
+        else:
+            return {'x': loc.x, 'y': loc.y}
 
     def get_chess(self, location: Location) -> Optional[ChineseChess]:
         return self.grids[location.y][location.x]

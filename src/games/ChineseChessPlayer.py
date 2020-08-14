@@ -100,7 +100,7 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
     # 当前棋局，以side为先手，所有action中，让side获得最高分的走法
     def search(self, board: ChineseChessBoard, side: ChineseChessSide, search_level: int, threshold: float = 1) -> Tuple[ChineseChessAction, float]:
         assert search_level >= 1
-        MAX_ACTIONS_LIMIT = 10
+        MAX_ACTIONS_LIMIT = 10000
 
         max_score = 0
         max_score_action = None

@@ -8,16 +8,19 @@ from games.ChineseChessPlayer import ChineseChessPlayer, ChineseChessAIPlayer, C
 
 SILENT_MODE = False
 MAX_TURNS = 1000
-WAIT_EACH_TURN = False
+WAIT_EACH_TURN = True
 
 players = [
+    # ChineseChessPlayer("Player1"),
+    # ChineseChessPlayer("Player2"),
     ChineseChessMaxMinAIPlayer("Player1", search_level=2),
-    ChineseChessMaxMinAIPlayer("Player2", search_level=4),
+    ChineseChessMaxMinAIPlayer("Player2", search_level=2),
 ]
 config = ChineseChessGameConfig(
     silent_mode=SILENT_MODE,
     max_turns=MAX_TURNS,
-    wait_each_turn=WAIT_EACH_TURN
+    wait_each_turn=WAIT_EACH_TURN,
+    load_file="data/temp.bd"
 )
 
 game = ChineseChessGame(players, config)

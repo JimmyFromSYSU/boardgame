@@ -114,6 +114,10 @@ class Judge():
     def check_end(self, status: GameStatus, players: List[Player]) -> bool:
         pass
 
+    @abc.abstractmethod
+    def next_player(self, status: GameStatus) -> None:
+        pass
+
 
     @abc.abstractmethod
     def validate_action(self, action: Action, status: GameStatus) -> bool:
@@ -183,11 +187,6 @@ class BoardGame():
 
         return True
 
-    # TODO: Move to Judge
-    @abc.abstractmethod
-    def next_player(self) -> None:
-        pass
-
     def turn(self) -> None:
         turn_end = False
         current_player = self.players[self.status.current_player_id]
@@ -206,13 +205,16 @@ class BoardGame():
         self.prepare()
 
         # 每一轮的定义：从决定下一个player开始，到该player进行操作，最后到就判断游戏是否结束。
-        while(self.judge.check_end(self.status, self.players) is False):
+        while(True):
             self.print_info(f"第{self.status.turns_count+1}轮")
-            # for next turn
-            if self.status.turns_count > 0:
-                self.next_player()
+
             self.turn()
+
+            if self.judge.check_end(self.status, self.players):
+                break
+
             self.status.turns_count += 1
+            self.judge.next_player(self.status)
 
         self.result()
         self.print_info("游戏结束")

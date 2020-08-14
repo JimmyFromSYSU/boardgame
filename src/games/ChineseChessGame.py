@@ -35,16 +35,6 @@ class ChineseChessGame(BoardGame):
         self.players[1].set_side(ChineseChessSide.DOWN)
         return True
 
-    # TODO: Move to Judge
-    def next_player(self) -> None:
-        if self.status.color == "红":
-            self.status.color = "绿"
-            self.status.side = ChineseChessSide.DOWN
-        else:
-            self.status.color = "红"
-            self.status.side = ChineseChessSide.UP
-        self.status.switch((self.status.turns_count)%2)
-
     def result(self) -> List[ChineseChessPlayer]:
         assert len(self.status.winner_names) <= 1
         if len(self.status.winner_names) == 0:

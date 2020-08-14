@@ -18,12 +18,45 @@ class  ChineseChessJudge(Judge):
     def validate_action(self, action: ChineseChessAction, status: ChineseChessGameStatus) -> bool:
         return True
 
+    def control_process(self, status: ChineseChessGameStatus) -> bool:
+        c = getch()
+        if c == 'q':
+            return True
+        elif c == 'r': # 'roll back'
+            if len(status.action_stack) >= 2:
+                action = status.action_stack.pop(-1)
+                self.printMoveAction(action, is_roll_back=True)
+                status.board.roll_back(action.item, action.from_, action.to_, action.captured_item)
+
+                action = status.action_stack.pop(-1)
+                self.printMoveAction(action, is_roll_back=True)
+                status.board.roll_back(action.item, action.from_, action.to_, action.captured_item)
+
+                status.board.print()
+
+                status.turns_count -= 2
+                status.game_end = False
+                status.winner_names = []
+        elif c == 's': # save the current board
+            status.board.save("data/temp.bd")
+        return False
+
+    def next_player(self, status: ChineseChessGameStatus) -> None:
+        if status.color == "红":
+            status.color = "绿"
+            status.side = ChineseChessSide.DOWN
+        else:
+            status.color = "红"
+            status.side = ChineseChessSide.UP
+        status.switch((status.turns_count)%2)
+
     # TODO: 增加规则：将帅不能直接相对。
     def check_end(self, status: ChineseChessGameStatus, players: List[ChineseChessPlayer]) -> bool:
         assert len(players) == 2, f"ChineseChessGame MUST have 2 players, {len(players)} are given"
         if status.turns_count >= self.config.max_turns:
             return True
 
+        # 判断是否一方已经没有将帅
         sides = [ChineseChessSide.UP, ChineseChessSide.DOWN]
         for side in sides:
             king_loc = status.board.get_king_location(side)
@@ -32,6 +65,7 @@ class  ChineseChessJudge(Judge):
                 status.winner_names = [p.name for p in players if p.side != side]
                 return True
 
+        # 判断将帅是否见面
         # up_king_loc = status.board.get_king_location(ChineseChessSide.UP)
         # down_king_loc = status.board.get_king_location(ChineseChessSide.DOWN)
         # if status.board.no_blocker(up_king_loc, down_king_loc, down):
@@ -43,11 +77,16 @@ class  ChineseChessJudge(Judge):
             return True
 
         if self.config.wait_each_turn:
-            c = getch()
-            if c == 'q':
+            if self.control_process(status):
                 return True
 
         return False
+
+    def printMoveAction(self, action, is_roll_back = False):
+        prefix = "撤回" if is_roll_back else ""
+        suffix = f"，并吃掉{action.captured_item}。" if action.captured_item else ""
+        self.print_info(f"{prefix}把{action.item}从{action.from_}移动到{action.to_}{suffix}")
+
 
     # TODO: set type of the action!
     # For now, assume all action is move action and is valid move
@@ -66,10 +105,8 @@ class  ChineseChessJudge(Judge):
         # 保存走法
         status.push(action)
 
-        if action.captured_item:
-            self.print_info(f"把{action.item}从{action.from_}移动到{action.to_}，并吃掉{action.captured_item}。")
-        else:
-            self.print_info(f"把{action.item}从{action.from_}移动到{action.to_}")
+        self.printMoveAction(action)
+
         if self.config.silent_mode is False:
             status.board.print()
         return True
