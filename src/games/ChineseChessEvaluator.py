@@ -63,6 +63,19 @@ CHESS_POSITION_VALUES = {
         [ 20,  20,  20,  20,  20,  20,  20,  20,  20],
         [  0,  10,  10,  10,   0,  10,  10,  10,   0],
     ],
+    ChineseChessType.PAO: [
+        [100, 100, 100,  50,  50,  50, 100, 100, 100],
+        [ 90,  90,  90,  70,  60,  70,  90,  90,  90],
+        [ 80,  80,  80,  80,  70,  80,  80,  80,  80],
+        [ 70,  70,  70,  80,  90,  80,  70,  70,  70],
+        [ 60,  60,  60,  80,  90,  80,  60,  60,  60],
+
+        [ 50,  50,  50,  80,  90,  80,  50,  50,  50],
+        [ 40,  40,  40,  80,  90,  80,  40,  40,  40],
+        [ 30,  30,  30,  70,  80,  70,  30,  30,  30],
+        [ 20,  20,  20,  20,  20,  20,  20,  20,  20],
+        [  0,  10,  10,  10,   0,  10,  10,  10,   0],
+    ],
     ChineseChessType.JIANG: [
         [  0,   0,   0,   0,   0,   0,   0,   0,   0],
         [  0,   0,   0,   0,   0,   0,   0,   0,   0],
@@ -127,6 +140,7 @@ class ChineseChessEvaluator(StatusEvaluator):
         else:
             return CHESS_POSITION_DEFAULT_VALUES[y][x]
 
+    # NOTE: make sure evaluate(board, side) = 1 - evaluate(board, opposite_side)
     # TODO: 添加先手优势FIRST_HAND_FACTOR。
     def evaluateBoard(self, board: ChineseChessBoard) -> float:
         assert self.side is not None
@@ -140,9 +154,9 @@ class ChineseChessEvaluator(StatusEvaluator):
         elif board.get_king_location(opposite_side) is None:
             return 1.0
 
-        # 确保两个king都还在场。
+        # 判断两个king是否照面。
+        # TODO: 该逻辑无法保证对称性：evaluate(board, side) = 1 - evaluate(board, opposite_side)
         if board.check_king_meet():
-            self.scores = {s: 1.0 for s in ChineseChessSide}
             return 1.0
 
         # 计算单边可能的最高分

@@ -13,15 +13,18 @@ WAIT_EACH_TURN = True
 players = [
     # ChineseChessPlayer("Player1"),
     # ChineseChessPlayer("Player2"),
-    ChineseChessMaxMinAIPlayer("Player1", search_level=2),
+    ChineseChessMaxMinAIPlayer("Player1", search_level=4),
     ChineseChessMaxMinAIPlayer("Player2", search_level=2),
 ]
 config = ChineseChessGameConfig(
     silent_mode=SILENT_MODE,
     max_turns=MAX_TURNS,
     wait_each_turn=WAIT_EACH_TURN,
-    load_file="data/temp.bd"
+    # load_file="data/temp.bd",
+    # load_file="data/一虎下山.bd",
+    # load_file="data/丹山起凤.bd",
 )
+
 
 game = ChineseChessGame(players, config)
 game.start()

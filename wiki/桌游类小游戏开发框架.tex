@@ -102,18 +102,20 @@
 
 \pagestyle{plain}
 
+        
+
 \usepackage{ctex}
 \usepackage{xeCJK}
 \xeCJKsetup{CJKmath=true}
 
 
-\usepackage[
-    left=1.0in,
-    right=1.0in,
-    top=1.5in,
-    bottom=1.5in,
-]{geometry}
-
+            \usepackage[
+                left=1.0in,
+                right=1.0in,
+                top=1.5in,
+                bottom=1.5in,
+            ]{geometry}
+        
 
 \setlength{\droptitle}{-18em}
 \title{\fontsize{40}{20} \textbf{\textcolor{red}{\kaishu 桌游类小游戏开发框架}}}
@@ -183,6 +185,8 @@ Judge负责判定Player产生的Action是否合法，并最终负责执行合法
 
 某些特殊的中国象棋残局添加了额外的限定，这种Judge和Rule解耦分开处理的方式有利于实现这些残局游戏。
 
+Judge还可以用于控制游戏状态和流程，比如实现回退，保存局面等。
+
 \section{Game}
 
 Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经过若干轮，每轮以其中一位Player为主，并由Judge执行操作。最后利用Judge判断游戏结束和得出胜利玩家列表。
@@ -207,6 +211,14 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
 \section{MaxMinAIPlayer}
 
 通过极大极小搜索和AlphaBeta剪枝实现多步的搜索。同样的会在搜索的尾部，调用Evaluator对局面进行评估。目前的单机搜索深度能够达到4到5层。
+
+\section{置换表}
+
+置换表可以用于保存某个局面的搜索评分，这样，下一次搜索到同一个局面时，可以检查是否已经有可用的评分了。通过哈希函数可以将局面映射到一个哈希键值，以及为局面加锁以防止冲突局面。
+
+\section{历史表}
+
+历史表对每种移动走法打分，并对打分高的的走法优先搜索，使得AlphaBeta剪枝的效率更高。本框架未实现历史表，而是通过对Action导致的新局面的评估函数作为该Action的分数进行排序。
 
 \chapter{对弈平台}
 

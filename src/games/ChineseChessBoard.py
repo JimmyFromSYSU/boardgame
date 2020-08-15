@@ -72,43 +72,46 @@ class ChineseChessBoard(Board):
         self.grids = [[None for w in range(self.width)] for h in range(self.height)]
 
         if self.config.is_default:
-            side = ChineseChessSide.DOWN
-            self.init_chess(ChineseChess("绿", "車", "01", side), Location(0, 9))
-            self.init_chess(ChineseChess("绿", "馬", "01", side), Location(1, 9))
-            self.init_chess(ChineseChess("绿", "象", "01", side), Location(2, 9))
-            self.init_chess(ChineseChess("绿", "士", "01", side), Location(3, 9))
-            self.init_chess(ChineseChess("绿", "將", "01", side), Location(4, 9))
-            self.init_chess(ChineseChess("绿", "士", "02", side), Location(5, 9))
-            self.init_chess(ChineseChess("绿", "象", "02", side), Location(6, 9))
-            self.init_chess(ChineseChess("绿", "馬", "02", side), Location(7, 9))
-            self.init_chess(ChineseChess("绿", "車", "02", side), Location(8, 9))
-            self.init_chess(ChineseChess("绿", "砲", "01", side), Location(1, 7))
-            self.init_chess(ChineseChess("绿", "砲", "02", side), Location(7, 7))
-            self.init_chess(ChineseChess("绿", "卒", "01", side), Location(0, 6))
-            self.init_chess(ChineseChess("绿", "卒", "02", side), Location(2, 6))
-            self.init_chess(ChineseChess("绿", "卒", "03", side), Location(4, 6))
-            self.init_chess(ChineseChess("绿", "卒", "04", side), Location(6, 6))
-            self.init_chess(ChineseChess("绿", "卒", "05", side), Location(8, 6))
-
             side = ChineseChessSide.UP
-            self.init_chess(ChineseChess("红", "車", "01", side), Location(0, 0))
-            self.init_chess(ChineseChess("红", "馬", "01", side), Location(1, 0))
-            self.init_chess(ChineseChess("红", "相", "01", side), Location(2, 0))
-            self.init_chess(ChineseChess("红", "仕", "01", side), Location(3, 0))
-            self.init_chess(ChineseChess("红", "帥", "01", side), Location(4, 0))
-            self.init_chess(ChineseChess("红", "仕", "02", side), Location(5, 0))
-            self.init_chess(ChineseChess("红", "相", "02", side), Location(6, 0))
-            self.init_chess(ChineseChess("红", "馬", "02", side), Location(7, 0))
-            self.init_chess(ChineseChess("红", "車", "02", side), Location(8, 0))
-            self.init_chess(ChineseChess("红", "炮", "01", side), Location(1, 2))
-            self.init_chess(ChineseChess("红", "炮", "02", side), Location(7, 2))
-            self.init_chess(ChineseChess("红", "兵", "01", side), Location(0, 3))
-            self.init_chess(ChineseChess("红", "兵", "02", side), Location(2, 3))
-            self.init_chess(ChineseChess("红", "兵", "03", side), Location(4, 3))
-            self.init_chess(ChineseChess("红", "兵", "04", side), Location(6, 3))
-            self.init_chess(ChineseChess("红", "兵", "05", side), Location(8, 3))
+            self.init_chess(ChineseChess("绿", "車", "01", side), Location(0, 0))
+            self.init_chess(ChineseChess("绿", "馬", "01", side), Location(1, 0))
+            self.init_chess(ChineseChess("绿", "象", "01", side), Location(2, 0))
+            self.init_chess(ChineseChess("绿", "士", "01", side), Location(3, 0))
+            self.init_chess(ChineseChess("绿", "將", "01", side), Location(4, 0))
+            self.init_chess(ChineseChess("绿", "士", "02", side), Location(5, 0))
+            self.init_chess(ChineseChess("绿", "象", "02", side), Location(6, 0))
+            self.init_chess(ChineseChess("绿", "馬", "02", side), Location(7, 0))
+            self.init_chess(ChineseChess("绿", "車", "02", side), Location(8, 0))
+            self.init_chess(ChineseChess("绿", "砲", "01", side), Location(1, 2))
+            self.init_chess(ChineseChess("绿", "砲", "02", side), Location(7, 2))
+            self.init_chess(ChineseChess("绿", "卒", "01", side), Location(0, 3))
+            self.init_chess(ChineseChess("绿", "卒", "02", side), Location(2, 3))
+            self.init_chess(ChineseChess("绿", "卒", "03", side), Location(4, 3))
+            self.init_chess(ChineseChess("绿", "卒", "04", side), Location(6, 3))
+            self.init_chess(ChineseChess("绿", "卒", "05", side), Location(8, 3))
+
+            side = ChineseChessSide.DOWN
+            self.init_chess(ChineseChess("红", "車", "01", side), Location(0, 9))
+            self.init_chess(ChineseChess("红", "馬", "01", side), Location(1, 9))
+            self.init_chess(ChineseChess("红", "相", "01", side), Location(2, 9))
+            self.init_chess(ChineseChess("红", "仕", "01", side), Location(3, 9))
+            self.init_chess(ChineseChess("红", "帥", "01", side), Location(4, 9))
+            self.init_chess(ChineseChess("红", "仕", "02", side), Location(5, 9))
+            self.init_chess(ChineseChess("红", "相", "02", side), Location(6, 9))
+            self.init_chess(ChineseChess("红", "馬", "02", side), Location(7, 9))
+            self.init_chess(ChineseChess("红", "車", "02", side), Location(8, 9))
+            self.init_chess(ChineseChess("红", "炮", "01", side), Location(1, 7))
+            self.init_chess(ChineseChess("红", "炮", "02", side), Location(7, 7))
+            self.init_chess(ChineseChess("红", "兵", "01", side), Location(0, 6))
+            self.init_chess(ChineseChess("红", "兵", "02", side), Location(2, 6))
+            self.init_chess(ChineseChess("红", "兵", "03", side), Location(4, 6))
+            self.init_chess(ChineseChess("红", "兵", "04", side), Location(6, 6))
+            self.init_chess(ChineseChess("红", "兵", "05", side), Location(8, 6))
         elif self.config.load_file:
             self.load(self.config.load_file)
+        elif self.config.custom_board:
+            for color, type_, number, side, x, y in self.config.custom_board:
+                self.init_chess(ChineseChess(color, type_, number, side), Location(x, y))
 
         assert len(self.items) > 0, "MUST have at lease 1 chess"
         return True
@@ -148,6 +151,7 @@ class ChineseChessBoard(Board):
 
     def init_chess(self, chess: ChineseChess, location: Optional[Location]) -> bool:
         id_ = chess.get_id()
+        assert id_ not in self.items
         self.items[id_] = chess
         if location:
             self.grids[location.y][location.x] = chess

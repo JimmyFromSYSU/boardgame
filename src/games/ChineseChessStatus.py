@@ -9,4 +9,4 @@ class ChineseChessGameStatus(GameStatus):
     def __init__(self, board: ChineseChessBoard, current_player_id: int):
         super().__init__(board, current_player_id)
         self.color = "红"
-        self.side = ChineseChessSide.UP
+        self.side = ChineseChessSide.DOWN

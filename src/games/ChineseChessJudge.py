@@ -42,17 +42,18 @@ class  ChineseChessJudge(Judge):
         return False
 
     def next_player(self, status: ChineseChessGameStatus) -> None:
-        if status.color == "红":
-            status.color = "绿"
-            status.side = ChineseChessSide.DOWN
-        else:
-            status.color = "红"
-            status.side = ChineseChessSide.UP
+        status.color = "绿" if status.color == "红" else "红"
+        status.side = ChineseChessSide.DOWN if status.side == ChineseChessSide.UP else ChineseChessSide.UP
         status.switch((status.turns_count)%2)
 
     # TODO: 增加规则：将帅不能直接相对。
     def check_end(self, status: ChineseChessGameStatus, players: List[ChineseChessPlayer]) -> bool:
         assert len(players) == 2, f"ChineseChessGame MUST have 2 players, {len(players)} are given"
+
+        if self.config.wait_each_turn:
+            if self.control_process(status):
+                return True
+
         if status.turns_count >= self.config.max_turns:
             return True
 
@@ -75,10 +76,6 @@ class  ChineseChessJudge(Judge):
             # 当前玩家下完后，导致了将帅碰面的情况，所以当前玩家的对手是winner。
             status.winner_names = [players[0].name if current_player_id == 1 else players[1].name]
             return True
-
-        if self.config.wait_each_turn:
-            if self.control_process(status):
-                return True
 
         return False
 

@@ -31,8 +31,8 @@ class ChineseChessGame(BoardGame):
     def prepare(self) -> bool:
         if super().prepare() is False:
             return False
-        self.players[0].set_side(ChineseChessSide.UP)
-        self.players[1].set_side(ChineseChessSide.DOWN)
+        self.players[0].set_side(ChineseChessSide.DOWN)
+        self.players[1].set_side(ChineseChessSide.UP)
         return True
 
     def result(self) -> List[ChineseChessPlayer]:
