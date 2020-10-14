@@ -6,7 +6,7 @@ from .ChineseChessBoard import ChineseChessBoard, ChineseChess
 from .ChineseChessUtils import ChineseChessSide, ChineseChessType
 from .ChineseChessUtils import up, down, left, right, up_left, up_right, down_left, down_right
 
-from .structs import Location
+from ..structs import Location
 from typing import List, Callable
 
 

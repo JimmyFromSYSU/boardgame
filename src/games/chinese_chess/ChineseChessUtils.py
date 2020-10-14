@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from .structs import Location
+from ..structs import Location
 from enum import Enum
 
 class ChineseChessType(Enum):

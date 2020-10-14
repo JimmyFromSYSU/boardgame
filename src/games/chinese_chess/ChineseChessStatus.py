@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from .BoardGame import GameStatus
+from ..BoardGame import GameStatus
 from .ChineseChessBoard import ChineseChessBoard
 from .ChineseChessUtils import ChineseChessSide
 

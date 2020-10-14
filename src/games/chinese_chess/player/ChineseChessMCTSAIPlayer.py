@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 
 from games.BoardGame import Player
-from games.ChineseChessBoard import ChineseChessBoard
-from games.ChineseChessStatus import ChineseChessGameStatus
-from games.ChineseChessAction import ChineseChessAction, ChineseChessMoveAction
-from games.ChineseChessUtils import ChineseChessSide, ChineseChessType
-from games.ChineseChessRule import getAllPossibleMoveActions, runActions, rollbackActions, runAction, rollbackAction
-from games.ChineseChessPlayer import ChineseChessMaxMinAIPlayer
+from games.chinese_chess.ChineseChessBoard import ChineseChessBoard
+from games.chinese_chess.ChineseChessStatus import ChineseChessGameStatus
+from games.chinese_chess.ChineseChessAction import ChineseChessAction, ChineseChessMoveAction
+from games.chinese_chess.ChineseChessUtils import ChineseChessSide, ChineseChessType
+from games.chinese_chess.ChineseChessRule import getAllPossibleMoveActions, runActions, rollbackActions, runAction, rollbackAction
+from games.chinese_chess.ChineseChessPlayer import ChineseChessMaxMinAIPlayer
 
 from games.structs import Location
 from termcolor import colored

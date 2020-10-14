@@ -2,13 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 from typing import List
-from .BoardGame import Judge
+from ..BoardGame import Judge
 from .ChineseChessStatus import ChineseChessGameStatus
 from .ChineseChessConfig import ChineseChessGameConfig
 from .ChineseChessAction import ChineseChessAction, ChineseChessMoveAction
 from .ChineseChessPlayer import ChineseChessPlayer
 from .ChineseChessUtils import ChineseChessSide, down
-from .utils import getch
+from ..utils import getch
 
 class  ChineseChessJudge(Judge):
     def __init__(self, config: ChineseChessGameConfig, level: int = 1):

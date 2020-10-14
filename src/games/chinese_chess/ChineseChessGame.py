@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from typing import List
-from .BoardGame import BoardGame
+from ..BoardGame import BoardGame
 from .ChineseChessStatus import ChineseChessGameStatus
 from .ChineseChessConfig import ChineseChessGameConfig
 from .ChineseChessBoard import ChineseChessBoard

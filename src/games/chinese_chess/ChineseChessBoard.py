@@ -2,10 +2,10 @@
 # -*- coding: UTF-8 -*-
 from typing import List, Optional, Dict
 from termcolor import colored
-from .structs import Location
+from ..structs import Location
 
 from .ChineseChessUtils import ChineseChessSide, ChineseChessType, down
-from .BoardGame import Board
+from ..BoardGame import Board
 
 import json
 

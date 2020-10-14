@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from .BoardGame import GameConfig
+from ..BoardGame import GameConfig
 
 
 class ChineseChessGameConfig(GameConfig):

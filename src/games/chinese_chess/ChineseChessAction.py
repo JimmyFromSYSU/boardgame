@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from .BoardGame import Action
+from ..BoardGame import Action
 from .ChineseChessBoard import ChineseChess
-from .structs import Location
+from ..structs import Location
 from typing import Optional
 
 

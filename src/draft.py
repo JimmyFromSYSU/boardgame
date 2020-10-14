@@ -2,9 +2,9 @@
 # -*- coding: UTF-8 -*-
 
 # TODO: 将所有ChineseChess相关类打包到ChineseChess.py中，一次性导入
-from games.ChineseChessGame import ChineseChessGame
-from games.ChineseChessConfig import ChineseChessGameConfig
-from games.ChineseChessPlayer import ChineseChessPlayer, ChineseChessAIPlayer, ChineseChessMaxMinAIPlayer
+from games.chinese_chess.ChineseChessGame import ChineseChessGame
+from games.chinese_chess.ChineseChessConfig import ChineseChessGameConfig
+from games.chinese_chess.ChineseChessPlayer import ChineseChessPlayer, ChineseChessAIPlayer, ChineseChessMaxMinAIPlayer
 from games.chinese_chess.player.ChineseChessMCTSAIPlayer import ChineseChessMCTSAIPlayer
 
 SILENT_MODE = False

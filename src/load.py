@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from games.ChineseChessBoard import ChineseChessBoard
-from games.ChineseChessConfig import ChineseChessGameConfig
-from games.ChineseChessUtils import ChineseChessSide
+from games.chinese_chess.ChineseChessBoard import ChineseChessBoard
+from games.chinese_chess.ChineseChessConfig import ChineseChessGameConfig
+from games.chinese_chess.ChineseChessUtils import ChineseChessSide
 
 
 SILENT_MODE = False

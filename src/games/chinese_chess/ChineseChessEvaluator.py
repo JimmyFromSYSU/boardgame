@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from .BoardGame import StatusEvaluator
+from ..BoardGame import StatusEvaluator
 from .ChineseChessBoard import ChineseChessBoard, ChineseChess
 from .ChineseChessUtils import ChineseChessType, ChineseChessSide
 from typing import Dict

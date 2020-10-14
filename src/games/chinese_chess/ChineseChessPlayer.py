@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from .BoardGame import Player
+from ..BoardGame import Player
 from .ChineseChessBoard import ChineseChessBoard
 from .ChineseChessStatus import ChineseChessGameStatus
 from .ChineseChessAction import ChineseChessAction, ChineseChessMoveAction
 from .ChineseChessUtils import ChineseChessSide, ChineseChessType
 from .ChineseChessRule import getAllPossibleMoveActions
-from .structs import Location
+from ..structs import Location
 from termcolor import colored
 import random
 from typing import List, Tuple, Optional
