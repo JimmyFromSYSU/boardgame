@@ -21,6 +21,7 @@
     colorlinks=true,
     linkcolor=DarkBlue,
     urlcolor=blue,
+    filecolor=DarkBlue,
     linktoc=all
 }
 \setcounter{tocdepth}{1}
@@ -158,7 +159,7 @@ python3 -m pip install termcolor
 
 \section{Board}
 
-游戏中最基本的元素是Board，相当与棋盘，牌桌。其中包含各类游戏物件以及他们的位置，比如棋子，纸牌。
+游戏中最基本的元素是Board，相当与棋盘，牌桌。其中包含各类游戏物件以及他们的位置，比如棋子，纸牌和骰子等。
 
 Board提供对这些游戏物件的访问和改变，比如改变某个物件的位置。同时也对Board上的基本状态进行检测，比如在中国象棋中判断当前局面上将帅是否照面。
 
@@ -191,7 +192,11 @@ Judge还可以用于控制游戏状态和流程，比如实现回退，保存局
 
 Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经过若干轮，每轮以其中一位Player为主，并由Judge执行操作。最后利用Judge判断游戏结束和得出胜利玩家列表。
 
-\lstinputlisting[language=Python]{src/games/BoardGame.py}
+
+
+Just a test
+
+
 
 \chapter{AI设计}
 
@@ -226,38 +231,72 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
 
 \chapter{TODO}
 
+\section{基础设施}
+
 
 \begin{itemize}
-\item{ 基础设施
-\begin{itemize}
-\item{ 学习和参照中国象棋标准，制定静态棋盘和动态棋局的文件格式。\href{https://www.xqbase.com/protocol/cchess_ucci.htm}{UCCI 中国象棋通用引擎协议　版本：3.0} }
-\item{ 借助latex项目，实现静态棋盘的图片的生成，以及实现动态棋局gif图的生成。 }
-\item{ 整理以前写的\href{https://github.com/JimmyFromSYSU/ChineseChess}{Javascript版本的象棋引擎} }
-\end{itemize}
- }
-\item{ AI设计
-\begin{itemize}
-\item{ 实现AI的自动博弈，并计算每次结局的基本情况和整体胜率。 }
-\item{ 实现训练框架对评估函数进行训练。 }
-\item{ 将MaxMinAIPlayer通用化，使得在五子棋等其他游戏中也可以直接复用。 }
-\item{ 学习通用的象棋AI算法，并制定下一步计划。 }
-\end{itemize}
- }
 \item{ 平台化
 \begin{itemize}
-\item{ \href{https://www.xqbase.com/protocol/cchess_ucci.htm}{UCCI 中国象棋通用引擎协议　版本：3.0} }
 \item{ 制作游戏UI。 }
-\item{ 参加中国象棋在线比赛，构建中国象棋在线比赛平台。 }
 \end{itemize}
  }
 \item{ Better Engineering
 \begin{itemize}
-\item{ 完善Readme文档 }
-\item{ 将项目添加到git上进行代码管理。 }
+\item{ 完善Readme文档。 }
 \item{ Modify all assert to exception }
 \end{itemize}
  }
 \end{itemize}
 
+
+\section{中国象棋}
+
+
+\begin{itemize}
+\item{ 将中国象棋相关代码移动到一个folder下。 }
+\item{ 判断和棋：长将，长捉，50步无吃子，双方无子可以过河等 }
+\item{ 棋型监测：双炮，马后炮，双车错，侧面虎等。 }
+\item{ 借助latex项目，实现静态棋盘的图片的生成，以及实现动态棋局gif图的生成。 }
+\item{ 整理以前写的\href{https://github.com/JimmyFromSYSU/ChineseChess}{Javascript版本的象棋引擎} }
+\end{itemize}
+
+
+\subsection{AI设计}
+
+AI相关内容更加复杂，需要更长时间的test，先Focus在基础设施的建设上，为AI的开发提供足够的工具集合。
+
+
+\begin{itemize}
+\item{ 添加Unit Test，对每个部件单独进行测试，比如player，evaluator，judge等。现在还有许多需要改进的点，每个点都建立对应的test cases。 }
+\item{ 制作工具快速添加新棋局到data中。 }
+\item{ 残局库：将象棋软件中的残局库添加到data中，可以通过残局对AI进行测试。 }
+\item{ 加强残局能力：对将军的action优先搜索，或者对将军的局面提高评分。可以同时计算所有的控子情况。通过对局面计算所有的actions，然后对所有吃子进行加成。 }
+\item{ 假设后手先走，现将后手可能的杀招计算出来，从而能够对actions的排序更加精确。 }
+\item{ 如何训练和制作开局库？ }
+\item{ 添加多线程实现AI加速。 }
+\item{ 当AI意识到自己输了的时候，AI也要选取最长路径来走。 }
+\item{ MCT:
+\begin{itemize}
+\item{ MCT还有很多不明确的点，先确认算法，然后实现一种更加readable的版本，并对每个步骤提供足够的unit test。 }
+\item{ 似乎后手的搜索不太起作用。考虑一个残局，先手优先可以吃子，但是后手可以将死先手。这时，先手陷入到了吃子的陷阱，并没有发现会被将死。测试"data/JJ象棋残局第98关.bd"。 }
+\end{itemize}
+ }
+\item{ 实现AI的自动博弈，并计算每次结局的基本情况和整体胜率。 }
+\item{ 实现训练框架对评估函数进行训练。 }
+\item{ 参加中国象棋在线比赛，构建中国象棋在线比赛平台：\href{https://www.xqbase.com/protocol/cchess_ucci.htm}{UCCI 中国象棋通用引擎协议　版本：3.0} }
+\end{itemize}
+
+
+
+\section{五子棋}
+
+
+\begin{itemize}
+\item{ 扩展到五子棋的游戏流程。 }
+\item{ 将MaxMinAIPlayer通用化，使得在五子棋等其他游戏中也可以直接复用。 }
+\end{itemize}
+
+
+\section{卡坦岛}
 
 \end{document}

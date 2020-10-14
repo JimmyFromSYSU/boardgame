@@ -1,3 +1,19 @@
 参考书目：
 
 * [象棋百科全书](http://www.xqbase.com/computer.htm)
+* 棋软"纵马奔流"在2003年获得奥林匹克电脑象棋比赛冠军，其开发者涂志坚的论文《电脑象棋的设计与实现》介绍了软件使用的技术。
+* 棋软"ELP"在1990、2011、2012年都获得了奥林匹克电脑象棋比赛冠军，其开发者许舜钦团队的英文论文《Computer Chinese Chess》介绍了ELP和象棋世家两款软件使用的技术。
+* 棋软"棋天大圣"在2006年获得浪潮杯首届中国计算机博弈锦标赛冠军，其开发者王骄的论文《中国象棋计算机博弈关键技术分析》介绍了大量AI技术，但并没有对"棋天大圣"使用了什么技术做太多的介绍。
+* 机器学习了：Tom Mitchell的Machine Learning一书第一章就讲了个训练下棋AI的例子。
+* [在程序弈海“纵马奔流”的涂志坚](https://www.xqbase.com/league/tuzhijian.htm)
+* 2017: [潘攻愚：被柯洁与阿法狗刷屏之后，让我们来聊聊国际象棋和中国象棋AI](https://www.guancha.cn/pangongyu/2017_05_27_410397_s.shtml)
+* [知乎：中国象棋AI实现?](https://www.zhihu.com/question/28068014)
+
+
+概念与方法：
+
+* [博弈树/游戏树](https://zh.wikipedia.org/wiki/%E7%AB%B6%E8%B3%BD%E6%A8%B9)
+* [蒙特卡洛树搜索](https://zh.wikipedia.org/wiki/%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E6%A0%91%E6%90%9C%E7%B4%A2)
+* [AlphaGo背后的力量：蒙特卡洛树搜索入门指南](https://www.jiqizhixin.com/articles/monte-carlo-tree-search-beginners-guide)
+* [蒙特卡洛树搜索（新手教程）](https://blog.csdn.net/qq_16137569/article/details/83543641)
+* 残差卷积神经网络：用于对局面进行评估。

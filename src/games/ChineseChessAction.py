@@ -20,3 +20,9 @@ class ChineseChessMoveAction(ChineseChessAction):
         self.from_ = from_
         self.to_ = to_
         self.captured_item = captured_item
+
+    def print(self, end='\n'):
+        captured_stmt = ""
+        if self.captured_item:
+            captured_stmt = f"，并吃掉{self.captured_item}"
+        print(f"{self.item}从{self.from_}移动到{self.to_}{captured_stmt}。", end=end)

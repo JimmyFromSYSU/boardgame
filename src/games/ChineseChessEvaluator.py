@@ -8,12 +8,12 @@ from typing import Dict
 
 # 每个棋子的价值
 CHESS_VALUES = {
-    ChineseChessType.JU: 220,
-    ChineseChessType.MA: 100,
-    ChineseChessType.PAO: 120,
-    ChineseChessType.XIANG: 30,
-    ChineseChessType.SHI: 40,
-    ChineseChessType.JIANG: 1000,
+    ChineseChessType.JU: 90,
+    ChineseChessType.MA: 40,
+    ChineseChessType.PAO: 45,
+    ChineseChessType.XIANG: 20,
+    ChineseChessType.SHI: 20,
+    ChineseChessType.JIANG: 90,
     ChineseChessType.ZU: 10,
 }
 
@@ -29,7 +29,7 @@ CHESS_COUNTS = {
     ChineseChessType.ZU: 5,
 }
 
-POSITION_FACTOR = 0.001  # best position will add 1% additional value
+POSITION_FACTOR = 0.1  # best position will add 1% additional value
 
 # max value = 100
 MAX_POSITION_VALUE = 100

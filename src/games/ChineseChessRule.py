@@ -124,3 +124,33 @@ def getPossibleMoveActions(board: ChineseChessBoard, item: ChineseChess) -> List
             if in_board(loc):
                 add_move_action(loc)
     return result
+
+
+def getAllPossibleMoveActions(board: ChineseChessBoard, side: ChineseChessSide) -> List[ChineseChessMoveAction]:
+    items = [
+        item
+        for item in list(board.items.values())
+        if item.side == side # make sure use the current color
+        if board.get_location(item) # make sure the item has not been captured
+    ]
+    actions = []
+    for item in items:
+        actions.extend(getPossibleMoveActions(board, item))
+    return actions
+
+def runAction(board: ChineseChessBoard, action: ChineseChessMoveAction):
+    board.run(action.item, action.from_, action.to_, action.captured_item)
+
+
+def rollbackAction(board: ChineseChessBoard, action: ChineseChessMoveAction):
+    board.roll_back(action.item, action.from_, action.to_, action.captured_item)
+
+
+def runActions(board: ChineseChessBoard, actions: List[ChineseChessMoveAction]):
+    for action in actions:
+        board.run(action.item, action.from_, action.to_, action.captured_item)
+
+
+def rollbackActions(board: ChineseChessBoard, actions: List[ChineseChessMoveAction]):
+    for action in actions:
+        board.roll_back(action.item, action.from_, action.to_, action.captured_item)

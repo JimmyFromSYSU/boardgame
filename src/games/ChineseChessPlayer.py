@@ -6,11 +6,10 @@ from .ChineseChessBoard import ChineseChessBoard
 from .ChineseChessStatus import ChineseChessGameStatus
 from .ChineseChessAction import ChineseChessAction, ChineseChessMoveAction
 from .ChineseChessUtils import ChineseChessSide, ChineseChessType
-from .ChineseChessRule import getPossibleMoveActions
+from .ChineseChessRule import getAllPossibleMoveActions
 from .structs import Location
 from termcolor import colored
 import random
-random.seed(2)
 from typing import List, Tuple, Optional
 import time
 
@@ -35,24 +34,12 @@ class ChineseChessPlayer(Player):
         else:
             self.print_info("playing chess")
 
-    def getAllPossibleMoveActions(self, board: ChineseChessBoard, side: ChineseChessSide) -> List[ChineseChessAction]:
-        items = [
-            item
-            for item in list(board.items.values())
-            if item.side == side # make sure use the current color
-            if board.get_location(item) # make sure the item has not been captured
-        ]
-        actions = []
-        for item in items:
-            actions.extend(getPossibleMoveActions(board, item))
-        return actions
-
     # TODO: 考虑无棋可走的情况：可以返回一个认输Action。
     def play(self, status: ChineseChessGameStatus) -> ChineseChessAction:
         self.print_playing_info(status)
 
         # 随机移动棋子
-        actions = self.getAllPossibleMoveActions(status.board, status.side)
+        actions = getAllPossibleMoveActions(status.board, status.side)
         action = random.choice(actions)
         self.print_info(f"计划把{action.item}从{action.from_}移动到{action.to_}")
         return action
@@ -70,7 +57,7 @@ class ChineseChessAIPlayer(ChineseChessPlayer):
         assert(self.side == status.side)
         self.print_playing_info(status)
 
-        actions = self.getAllPossibleMoveActions(status.board, status.side)
+        actions = getAllPossibleMoveActions(status.board, status.side)
 
         max_score = 0
         max_score_action = None
@@ -95,6 +82,7 @@ class ChineseChessAIPlayer(ChineseChessPlayer):
 # TODO: move to BoardGame.py
 class BoardHashTable():
     def __init__(self, type_number, location_number, N):
+        random.seed(10)
         self.type_number = type_number  # 棋子种类
         self.location_number = location_number  # 位置总数
         self.N = N  # 置换表中可存储棋盘的总数为2^N
@@ -105,6 +93,7 @@ class BoardHashTable():
         self.side = None
         self.hit_cache_counter = 0
         self.conflict_counter = 0
+
 
     # TODO: 将hash从字典换成数组
     # TODO: 局面的评估对不同side是可以对等的吗？需要保证evaluation函数的对称性，即evaluate(board, side) = 1 - evaluate(board, opposite_side)
@@ -151,13 +140,9 @@ class BoardHashTable():
     def create_random_list(self):
         result = []
         # factor = 100000007
-        # seed = random.randrange(self.board_number)
         for i in range(self.type_number * self.location_number):
             rnd = random.randrange(self.board_number)
             result.append(rnd)
-            # rnd = ((seed + i) * factor) % self.board_number
-            # result.append(rnd)
-            # print(rnd)
         return result
 
     # TODO: how to cache functions
@@ -227,9 +212,8 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
     def prepare(self) -> bool:
         if super().prepare() is False:
             return False
-        self.hash_table = BoardHashTable(14, 90, 23)
+        self.hash_table = BoardHashTable(14, 90, 20)
         return True
-
 
     # 当前棋局，以side为先手，所有action中，让side获得最高分的走法
     def search(self, board: ChineseChessBoard, lock: int, key: int, side: ChineseChessSide, search_level: int, threshold_max: float = 1) -> Tuple[ChineseChessAction, float]:
@@ -237,7 +221,7 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
 
         assert search_level >= 1
 
-        actions = self.getAllPossibleMoveActions(board, side)
+        actions = getAllPossibleMoveActions(board, side)
         opposite_side = ChineseChessSide.DOWN if side == ChineseChessSide.UP else ChineseChessSide.UP
 
         # TODO: 使用历史表对actions进行排序
@@ -256,6 +240,7 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
                 self.evaluator.set_status(opposite_side)
                 t_score = self.evaluator.evaluateBoard(board)
                 self.hash_table.set_score(new_lock, new_key, t_score, 0, opposite_side)
+
                 # score == None代表将互相照面，则当前局面的先手获胜。
                 if t_score == None:
                     t_score = 1.0
@@ -296,12 +281,12 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
                 max_score = score
                 max_score_action = action
 
-            # FOR DEBUG:
-            if search_level >= self.search_level:
-                captured_stmt = ""
-                if action.captured_item:
-                    captured_stmt = f"，并吃掉{action.captured_item}"
-                self.print_info(f"{search_level}：{side}：{action.item}从{action.from_}移动到{action.to_}{captured_stmt}。直接得分：{direct_score}，搜索得分：{score}， 最高分：{max_score}，阈值：{threshold_max}")
+            # # FOR DEBUG:
+            # if search_level >= self.search_level:
+            #     captured_stmt = ""
+            #     if action.captured_item:
+            #         captured_stmt = f"，并吃掉{action.captured_item}"
+            #     self.print_info(f"{search_level}：{side}：{action.item}从{action.from_}移动到{action.to_}{captured_stmt}。直接得分：{direct_score}，搜索得分：{score}， 最高分：{max_score}，阈值：{threshold_max}")
 
             # AlphaBeta剪枝
             # 假设每个局面有N种走法，则最好情况下：
@@ -313,6 +298,7 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
                 return (max_score_action, max_score)
 
         self.hash_table.set_score(lock, key, max_score, search_level, side)
+
         return (max_score_action, max_score)
 
     # TODO: 考虑无棋可走的情况：可以返回一个认输Action。
@@ -324,6 +310,8 @@ class ChineseChessMaxMinAIPlayer(ChineseChessAIPlayer):
         start = time.time()
 
         self.evaluate_counter = 0
+        self.hash_table.hit_cache_counter = 0
+        self.hash_table.conflict_counter = 0
 
         # TODO: move lock/key to search function so we don't need to add it in parameter list
         (lock, key) = self.hash_table.gen_key_for_board(status.board)

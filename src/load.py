@@ -8,7 +8,7 @@ from games.ChineseChessUtils import ChineseChessSide
 SILENT_MODE = False
 MAX_TURNS = 1000
 WAIT_EACH_TURN = True
-custom_board_name = "丹山起凤"
+custom_board_name = "JJ象棋残局第98关"
 custom_boards = {
     "一虎下山": [
         ("红", "帥", "01", ChineseChessSide.DOWN, 3, 9),
@@ -49,6 +49,22 @@ custom_boards = {
         ("绿", "卒", "01", ChineseChessSide.UP, 2, 8),
         ("绿", "卒", "02", ChineseChessSide.UP, 4, 8),
     ],
+    "JJ象棋残局第98关": [
+        ("红", "帥", "01", ChineseChessSide.DOWN, 5, 9),
+        ("红", "車", "01", ChineseChessSide.DOWN, 8, 9),
+        ("红", "車", "02", ChineseChessSide.DOWN, 1, 3),
+        ("红", "炮", "01", ChineseChessSide.DOWN, 8, 8),
+        ("红", "馬", "01", ChineseChessSide.DOWN, 0, 3),
+        ("红", "兵", "01", ChineseChessSide.DOWN, 5, 1),
+
+        ("绿", "將", "01", ChineseChessSide.UP, 3, 0),
+        ("绿", "士", "01", ChineseChessSide.UP, 5, 0),
+        ("绿", "砲", "01", ChineseChessSide.UP, 4, 0),
+        ("绿", "車", "01", ChineseChessSide.UP, 0, 8),
+        ("绿", "車", "02", ChineseChessSide.UP, 7, 3),
+        ("绿", "馬", "01", ChineseChessSide.UP, 3, 7),
+        ("绿", "卒", "01", ChineseChessSide.UP, 3, 9),
+    ]
 }
 
 config = ChineseChessGameConfig(
