@@ -101,14 +101,17 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
     * Modify all assert to exception
 
 ### Catan
-* 前台：js/html/css + vue.js + js game engine: [Crafty](https://github.com/craftyjs/Crafty)
-  * [More js game engine](https://github.com/collections/javascript-game-engines)
-  * [Vue.js tutorial 1](https://www.youtube.com/watch?v=bI5jpueiCWw&t=756s)
-  * [Vue.js turorial 2](https://www.youtube.com/watch?v=xq532yn8gMA&t=2608s)
-* 后台：django
-  * Websocket: [tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
-* 图片资源
-* 游戏流程
+* 第一阶段：所有前后台连接，实现基本的游戏状态。
+    * 前台：js/html/css + vue.js + js game engine: [Crafty](https://github.com/craftyjs/Crafty)
+    * [More js game engine](https://github.com/collections/javascript-game-engines)
+    * [Vue.js tutorial 1](https://www.youtube.com/watch?v=bI5jpueiCWw&t=756s)
+    * [Vue.js turorial 2](https://www.youtube.com/watch?v=xq532yn8gMA&t=2608s)
+    * 后台：django
+    * Websocket: [tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
+    * 图片资源
+    * 游戏流程
+* 第二阶段：测试优化
+* 第三阶段：AI设计
 
 
 ### 中国象棋
@@ -143,5 +146,3 @@ AI相关内容更加复杂，需要更长时间的test，先Focus在基础设施
 
 * 扩展到五子棋的游戏流程。
 * 将MaxMinAIPlayer通用化，使得在五子棋等其他游戏中也可以直接复用。
-
-### 卡坦岛
