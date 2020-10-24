@@ -3,3 +3,4 @@
 /wiki/*.toc
 /wiki/*.log
 /wiki/*.out
+/.idea/*
