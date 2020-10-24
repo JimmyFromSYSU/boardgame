@@ -1,3 +1,5 @@
+# source ~/ENV/bin/activate
+
 all:
 	python3 src/draft.py
 
