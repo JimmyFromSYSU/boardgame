@@ -100,6 +100,17 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
     * 完善Readme文档。
     * Modify all assert to exception
 
+### Catan
+* 前台：js/html/css + vue.js + js game engine: [Crafty](https://github.com/craftyjs/Crafty)
+  * [More js game engine](https://github.com/collections/javascript-game-engines)
+  * [Vue.js tutorial 1](https://www.youtube.com/watch?v=bI5jpueiCWw&t=756s)
+  * [Vue.js turorial 2](https://www.youtube.com/watch?v=xq532yn8gMA&t=2608s)
+* 后台：django
+  * Websocket: [tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
+* 图片资源
+* 游戏流程
+
+
 ### 中国象棋
 
 * 将中国象棋相关代码移动到一个folder下。
