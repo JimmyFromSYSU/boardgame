@@ -1,0 +1,99 @@
+digraph G {
+    node [style=filled]; // , color=lightblue
+    rankdir = LR;
+
+    subgraph cluster_2_1 {
+		style=filled;
+		color=orchid2;
+		node [style=filled];
+
+        operation_start
+        operation_end
+        trade
+        build
+        buy_development_card
+        play_development_card
+
+
+        operation_start -> trade;
+        operation_start -> build;
+        operation_start -> buy_development_card;
+        operation_start -> play_development_card;
+
+        trade -> operation_end;
+        build -> operation_end;
+        buy_development_card -> operation_end;
+        play_development_card -> operation_end;
+
+		label = "Operation";
+	}
+
+
+    subgraph cluster_2 {
+		style=filled;
+		color=limegreen;
+		node [style=filled];
+
+        my_turn_start
+        my_turn_end
+        roll_dice
+        play_robber
+		get_cards
+        think
+        operation [shape=box, color=orchid2]
+
+        my_turn_start -> roll_dice;
+        roll_dice -> get_cards;
+        roll_dice -> play_robber;
+        play_robber -> think;
+        get_cards -> think;
+        think -> operation;
+        operation -> think;
+        think -> my_turn_end;
+        operation -> my_turn_end;
+
+		label = "My Turn";
+	}
+
+
+    subgraph cluster_1 {
+		style=filled;
+		color=wheat;
+		node [style=filled];
+        settle_start
+        settle_end
+		my_settle
+        others_settle
+        settle_start -> my_settle;
+        settle_start -> others_settle;
+
+        my_settle -> others_settle;
+        others_settle -> my_settle;
+
+        my_settle -> settle_end;
+        others_settle -> settle_end;
+
+		label = "Settle";
+        {rank=same; others_settle; my_settle;}
+	}
+
+    subgraph cluster_0 {
+        settle [shape=box, color=wheat]
+        my_turn [shape=box, color=limegreen]
+
+        start -> prepare;
+        prepare -> settle;
+        settle -> get_initial_cards;
+        get_initial_cards-> my_turn;
+        get_initial_cards-> others_turn;
+        my_turn -> others_turn;
+        others_turn -> my_turn;
+        others_turn -> others_turn;
+        my_turn -> summary;
+        others_turn -> summary;
+        summary -> end;
+
+        label = "Main";
+        {rank=same; others_turn; my_turn;}
+    }
+}

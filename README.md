@@ -51,6 +51,14 @@ Judge还可以用于控制游戏状态和流程，比如实现回退，保存局
 
 Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经过若干轮，每轮以其中一位Player为主，并由Judge执行操作。最后利用Judge判断游戏结束和得出胜利玩家列表。
 
+## 卡坦岛设计
+
+### 游戏状态转换
+
+ {{images/README/catan_web_player_state_machine.dot}}[dot:卡坦岛玩家状态转换]
+
+### 坐标系设计
+
 ## AI设计
 
 AIPlayer可以实现自动的游戏过程，一些通用的AIPlayer可以被不同的游戏重复利用。
