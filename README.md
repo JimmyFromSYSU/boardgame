@@ -106,7 +106,7 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
     * [More js game engine](https://github.com/collections/javascript-game-engines)
     * [Vue.js tutorial 1](https://www.youtube.com/watch?v=bI5jpueiCWw&t=756s)
     * [Vue.js turorial 2](https://www.youtube.com/watch?v=xq532yn8gMA&t=2608s)
-    * 后台：django
+    * 后台：[django](https://www.djangoproject.com/)
     * Websocket: [tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
     * 图片资源
     * 游戏流程
