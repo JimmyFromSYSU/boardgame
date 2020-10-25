@@ -4,3 +4,4 @@
 /wiki/*.log
 /wiki/*.out
 /.idea/*
+*.sqlite3
