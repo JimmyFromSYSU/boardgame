@@ -1,0 +1,17 @@
+{%extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div id="catan_game"></div>
+{% endblock %}
+
+
+{% block js %}
+<script src="{% static 'catan/catan_maps.js' %}"></script>
+<script src="{% static 'catan/catan.js' %}"></script>
+{% endblock %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'catan/catan.css' %}">
+{% endblock %}
