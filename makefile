@@ -1,4 +1,3 @@
-# source ~/ENV/bin/activate
 
 all:
 	python3 src/draft.py
@@ -7,7 +6,8 @@ load:
 	python3 src/load.py
 
 server:
-	python src/portal/manage.py runserver 0.0.0.0:5000
+	# source ~/ENV/bin/activate
+	python src/portal/manage.py runserver 0.0.0.0:5001
 
 readme:
 	python3 ../latex/create_book.py --path README.md --name 桌游类小游戏开发框架 --author "南方小智" --output wiki
