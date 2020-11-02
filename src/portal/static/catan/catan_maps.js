@@ -2,6 +2,7 @@ catan_maps = {
     'normal': {
         'row': 7,
         'col': 8,
+        'robber': {x: 3, y: 3},
         'tiles':
             [
             // {x: 0, y: 0, name: 'sea'},
@@ -65,9 +66,75 @@ catan_maps = {
             // {x: 7, y: 6, name: 'sea'},
         ]
     },
+    'inland_sea': {
+        'row': 7,
+        'col': 9,
+        'robber': {x: 2, y: 1},
+        'tiles': [
+            {x: 1, y: 0, name: 'sea'},
+            {x: 2, y: 0, name: 'sea'},
+            {x: 3, y: 0, name: 'sea'},
+            {x: 4, y: 0, name: 'sea'},
+            {x: 5, y: 0, name: 'sea'},
+            {x: 6, y: 0, name: 'sea'},
+            {x: 7, y: 0, name: 'sea'},
+
+            {x: 0, y: 1, name: 'sea'},
+            {x: 1, y: 1, name: 'brick'},
+            {x: 2, y: 1, name: 'desert'},
+            {x: 3, y: 1, name: 'brick'},
+            {x: 4, y: 1, name: 'lumber'},
+            {x: 5, y: 1, name: 'grain'},
+            {x: 6, y: 1, name: 'lumber'},
+            {x: 7, y: 1, name: 'sea'},
+
+            {x: 1, y: 2, name: 'sea'},
+            {x: 2, y: 2, name: 'ore'},
+            {x: 3, y: 2, name: 'wool'},
+            {x: 4, y: 2, name: 'sea'},
+            {x: 5, y: 2, name: 'grain'},
+            {x: 6, y: 2, name: 'brick'},
+            {x: 7, y: 2, name: 'sea'},
+
+            {x: 0, y: 3, name: 'sea'},
+            {x: 1, y: 3, name: 'ore'},
+            {x: 2, y: 3, name: 'lumber'},
+            {x: 3, y: 3, name: 'sea'},
+            {x: 4, y: 3, name: 'sea'},
+            {x: 5, y: 3, name: 'lumber'},
+            {x: 6, y: 3, name: 'ore'},
+            {x: 7, y: 3, name: 'sea'},
+
+            {x: 1, y: 4, name: 'sea'},
+            {x: 2, y: 4, name: 'grain'},
+            {x: 3, y: 4, name: 'wool'},
+            {x: 4, y: 4, name: 'sea'},
+            {x: 5, y: 4, name: 'wool'},
+            {x: 6, y: 4, name: 'grain'},
+            {x: 7, y: 4, name: 'sea'},
+
+            {x: 0, y: 5, name: 'sea'},
+            {x: 1, y: 5, name: 'grain'},
+            {x: 2, y: 5, name: 'ore'},
+            {x: 3, y: 5, name: 'lumber'},
+            {x: 4, y: 5, name: 'ore'},
+            {x: 5, y: 5, name: 'grain'},
+            {x: 6, y: 5, name: 'ore'},
+            {x: 7, y: 5, name: 'sea'},
+
+            {x: 1, y: 6, name: 'sea'},
+            {x: 2, y: 6, name: 'sea'},
+            {x: 3, y: 6, name: 'sea'},
+            {x: 4, y: 6, name: 'sea'},
+            {x: 5, y: 6, name: 'sea'},
+            {x: 6, y: 6, name: 'sea'},
+            {x: 7, y: 6, name: 'sea'},
+        ],
+    },
     'fertile_land': {
         'row': 9,
         'col': 11,
+        'robber': {x: 5, y: 4},
         'tiles':
             [
             // {x: 0, y: 0, name: 'sea'},
