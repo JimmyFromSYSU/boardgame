@@ -31,7 +31,7 @@ var CatanGame = {
         // catan_maps.normal
         // catan_maps.fertile_land
         // catan_maps.inland_sea
-        game.load_map_config(catan_maps.normal);
+        game.load_map_config(catan_maps.fertile_land);
 
         // 计算tile的id到tile的mapping
         game.get_tile_id = function(location) {
