@@ -24,43 +24,50 @@ var catan_load_buttons = function(game) {
 
         trade_mark: {},
     };
+    const click_volume = 0.5;
+    const click_button = function(e) {
+        e.x = e.anchor_x + 5;
+        e.y = e.anchor_y + 5;
+    }
+    const reset_button = function(e) {
+        e.x = e.anchor_x;
+        e.y = e.anchor_y;
+    }
 
     /***********************************\
      * Main button 相关函数
     \***********************************/
-    game.set_button_movement = function(e, callback, sound = "click_on") {
+    // 设置按钮按下时的位移动画
+    game.set_button_movement = function(e, callback, sound = "click_on", bind_e) {
         if ( (!e.anchor_x) || (!e.anchor_y)) {
             console.warn(`must set anchor_x/anchor_y for ${e}`);
             return;
         }
         e.unbind('MouseDown').unbind('MouseUp');
         e.bind('MouseDown', function(MouseEvent){
-            console.log(`button down ${e.name}`);
-            this.y = this.anchor_y + 5;
-            this.x = this.anchor_x + 5;
+            click_button(this);
+            if (bind_e) {click_button(bind_e)}
         }).bind('MouseUp', function(MouseEvent){
-            // console.log(`button up ${e.name}`);
-            this.y = this.anchor_y;
-            this.x = this.anchor_x;
-
-            // Crafty.audio.stop("click_on");
-            Crafty.audio.play(sound);
-
+            reset_button(this);
+            if (bind_e) {reset_button(bind_e)}
+            Crafty.audio.play(sound, 1, click_volume);
             if (callback) {
                 callback()
             }
         }).bind('MouseOut', function(MouseEvent){
-            this.y = this.anchor_y;
-            this.x = this.anchor_x;
+            reset_button(this);
+            if (bind_e) {reset_button(bind_e)}
         });
     }
+    // 隐藏并取消按钮功能
     game.disable_button = function(btn) {
         if (btn.bg_e) {
             btn.bg_e.alpha = 0;
         }
         btn.e.alpha = 0;
-        btn.e.unbind('MouseDown').unbind('MouseUp');
+        btn.e.unbind('MouseDown').unbind('MouseUp').unbind('MouseOut').unbind('MouseOver');
     };
+    // 显示并激活按钮功能
     game.enable_button = function(btn, callback, sound = "click_on") {
         if (btn.bg_e) {
             btn.bg_e.alpha = 1;
@@ -97,14 +104,15 @@ var catan_load_buttons = function(game) {
     game.add_buy_card = function(name) {
         var trade_card = {name: name};
         game.control.trade_buy_cards.push(trade_card);
-        console.log(game.control.trade_buy_cards);
     }
-    game.remove_buy_card = function(name) {
+    game.remove_buy_card = function(name, number = 1) {
+        var count = 0
         var buy_cards = game.control.trade_buy_cards;
         for( var i = 0; i < buy_cards.length; i++){
-            if ( buy_cards[i].name == name) {
+            if ( buy_cards[i].name == name && count < number) {
                 if (buy_cards[i].e) {buy_cards[i].e.destroy();}
                 buy_cards.splice(i, 1);
+                count = count + 1;
             }
         }
     }
@@ -116,13 +124,10 @@ var catan_load_buttons = function(game) {
         const show_pct =  game.get_trade_panel_show_pct(buy_cards.length, game.sizes.trade_card_w);
         game.destroy_cards_e(buy_cards);
         buy_cards.forEach((card, index) => {
-            // console.log(`${game.sizes.trade_card_l}, ${game.sizes.pay_cards_t}, ${index}, ${show_pct}`);
             card.e = Crafty.e("2D, DOM, Mouse, card_" + card.name).attr({
                 x: game.sizes.trade_card_l + game.sizes.trade_card_w * show_pct * index,
                 y: game.sizes.buy_cards_t,
                 name: card.name,
-                // anchor_x: x,
-                // anchor_y: y,
                 z: 10,
                 w: game.sizes.trade_card_w,
                 h: game.sizes.trade_card_h,
@@ -132,7 +137,7 @@ var catan_load_buttons = function(game) {
                 }
                 game.remove_buy_card(card.name);
                 game.set_buy_cards_panel();
-                Crafty.audio.play("click_off", 1, 0.5);
+                Crafty.audio.play("click_off", 1, click_volume);
             });
         })
     }
@@ -171,7 +176,7 @@ var catan_load_buttons = function(game) {
                 }
                 game.remove_pay_card(card.name);
                 game.set_pay_cards_panel();
-                Crafty.audio.play("click_off", 1, 0.5);
+                Crafty.audio.play("click_off", 1, click_volume);
             });
             game.control.trade_pay_cards.push(trade_card);
         })
@@ -338,9 +343,6 @@ var catan_load_buttons = function(game) {
     /***********************************\
      * 设置Dice
     \***********************************/
-    game.board.dice = {
-        // names: ['dice1', 'dice2', 'dice3'],
-    };
     game.roll_dice = function(e, number) {
         if (e.isPlaying()) {
             return null;
@@ -354,7 +356,6 @@ var catan_load_buttons = function(game) {
         animation.push(number);
 
         var animation_list = animation.map(v => [v, 0]);
-        // console.log(animation_list);
         var reel = e.getReel('roll_dice');
         if (reel) {
             reel.frames = animation_list;
@@ -486,7 +487,7 @@ var catan_load_buttons = function(game) {
                     z: 11,
                     w: avatar_size,
                     h: avatar_size,
-                });
+                })
                 player.frame_e = Crafty.e("2D, Canvas, Color").attr({
                     x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
                     y: game.sizes.select_player_t,
@@ -497,7 +498,8 @@ var catan_load_buttons = function(game) {
                     w: avatar_frame_size,
                     h: avatar_frame_size,
                 }).color(player.color);
-                // game.set_button_movement(card.e, game.select_buy_card(card.name));
+
+                game.set_button_movement(player.e, null, "click_on", player.frame_e);
             }
         });
 

@@ -13,8 +13,8 @@ var images = {
     },
 }
 
-
-var assets = {
+// 部分浏览器无法加载Audio，所以单独列出加载
+var audio_asserts = {
     "audio": {
         "roll_dice": ["/static/sounds/catan/roll_dice.wav"],
         "click_on": ["/static/sounds/catan/click_on.wav"],
@@ -26,7 +26,9 @@ var assets = {
         "punch": ["/static/sounds/catan/punch.wav"],
         "ding": ["/static/sounds/catan/ding.wav"],
     },
-    // "images": ["/static/images/catan/panel/dice.png"],
+}
+
+var assets = {
     "sprites": {
         ///////////////////
         // basic
@@ -43,6 +45,9 @@ var assets = {
             // "paddingX": 5,
             // "paddingY": 5,
             // "paddingAroundBorder": 10
+        },
+        "/static/images/catan/map/number_bg.png": {
+            "tile": 120, "tileh": 120, "map": { "number_bg": [0,0]},
         },
 
         ///////////////////
@@ -178,6 +183,12 @@ var assets = {
             "tile": 284, "tileh": 429, "map": { "card_score": [0,0]},
         },
 
+        ///////////////////
+        // harbor
+        //////////////////
+        // "/static/images/catan/map/resource/brick.png": {
+        //     "tile": 105, "tileh": 120, "map": { "harbor_brick": [0,0]},
+        // },
 
         ///////////////////
         // button

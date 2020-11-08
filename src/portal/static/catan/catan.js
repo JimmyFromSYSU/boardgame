@@ -65,6 +65,29 @@ var CatanGame = {
             // {name: '时涛', id: 8, sprite: 'player_id_2', color: 'black',},
         ];
 
+        function pad(num, size) {
+            num = num.toString();
+            while (num.length < size) num = "0" + num;
+            return num;
+        }
+        function get_card_number_color(number, max_number){
+            if (number == max_number) {
+                return '#ff0000';
+            } else if (number <= max_number - game.players.length) {
+                // 平均人手一张。
+                return '#00ff00';
+            } else {
+                return '#ffff00';
+            }
+        }
+        function get_tile_number_color(number){
+            if (number>= 6 && number <= 9) {
+                return '#dd0000';
+            } else {
+                return '#333333';
+            }
+        }
+
         /***********************************\
 		 * 设置所有的tile
 		\***********************************/
@@ -160,10 +183,12 @@ var CatanGame = {
                 console.log("move the robber");
                 if(pre_tile) { // robber 已经在某个tile上
                     pre_tile.robber_e = null;
+                    if (pre_tile.num_e) {pre_tile.num_e.textColor(get_tile_number_color(pre_tile.num));}
                     Crafty.audio.stop("punch");
                     Crafty.audio.play("punch", 1, 0.2);
                 }
                 tile.robber_e = game.board.robber.e;
+                if (tile.num_e) {tile.num_e.textColor("#bbbbbb");}
                 game.board.robber.tile = tile;
                 game.board.robber.e.x = center.x - w / 2;
                 game.board.robber.e.y = center.y - h / 2;
@@ -175,7 +200,7 @@ var CatanGame = {
         game.load_robber = function() {
             const robber = game.board.robber;
             const location = {x: robber.x, y: robber.y};
-            game.board.robber.e = Crafty.e("2D, Canvas, obj_robber").attr({z: 10, alpha: 1});
+            game.board.robber.e = Crafty.e("2D, DOM, obj_robber").attr({z: 10, alpha: 1});
             game.set_robber(location);
         }
 
@@ -351,7 +376,9 @@ var CatanGame = {
             const tl = game.get_tile_tl(location);
             return {x: tl.x + tile_w/2, y: tl.y + tile_h/2};
         };
-        // 加载一个tile，如果是大陆，也加载大陆架
+        // 加载一个tile，
+        // 如果有数字，也加载数字
+        // 如果是大陆，也加载大陆架
         game.load_tile = function(tile) {
             const tl = game.get_tile_tl(
                 {x: tile.x, y: tile.y}
@@ -366,6 +393,51 @@ var CatanGame = {
                 w: tile_w,
                 h: tile_h,
             });
+
+            if (tile.num) {
+                const text_height = tile_h / 4;
+                tile.num_e = Crafty.e("2D, DOM, Text").attr({
+                    x: x,
+                    y: y + (tile_h - text_height) / 2,
+                    z: 11,
+                    w: tile_w,
+                    h: text_height,
+                })
+                .text(tile.num)
+                .css({ "text-align": "center" })
+                .textColor(get_tile_number_color(tile.num))
+                .textFont({family: 'Arial', size: `${text_height}px`, weight: 'bold'});
+
+                const center = game.get_tile_center({x: tile.x, y: tile.y})
+                const w = tile_h / 4 * 1.5;
+                const h = tile_h / 4 * 1.5;
+                var touch_area = Crafty.e(`2D, DOM, number_bg`).attr({
+                    x: center.x - w/2,
+                    y: center.y - h/2,
+                    z: 0,
+                    alpha: 0.8,
+                    w: w,
+                    h: h,
+                });
+                // game.set_toggle(touch_area);
+                // game.set_click_tile_obj(touch_area, tile);
+
+
+            }
+
+            if (tile.harbor) {
+                const center = game.get_tile_center({x: tile.x, y: tile.y})
+                const w = tile_h / 4 * 2.5;
+                const h = tile_h / 4 * 2.5;
+                var touch_area = Crafty.e(`2D, DOM, harbor_${tile.harbor}`).attr({
+                    x: center.x - w/2,
+                    y: center.y - h/2,
+                    z: 0,
+                    alpha: 0.8,
+                    w: w,
+                    h: h,
+                });
+            }
 
             // 填充陆地中tile之间的空隙。
             if (tile.name !== 'sea') {
@@ -568,8 +640,8 @@ var CatanGame = {
         game.load_tile_touch_areas = function() {
             game.board.tiles.forEach(tile => {
                 const center = game.get_tile_center({x: tile.x, y: tile.y})
-                const w = tile_h / 4 * 1.5;
-                const h = tile_h / 4 * 1.5;
+                const w = tile_h / 4 * 1.8;
+                const h = tile_h / 4 * 1.8;
                 if(tile.name != 'sea') {
                     var touch_area = Crafty.e(`2D, DOM, Mouse, obj_touch_area`).attr({
                         x: center.x - w/2,
@@ -622,26 +694,11 @@ var CatanGame = {
                 {'name': 'dcs_back', number: 25},
             ],
         };
-        function pad(num, size) {
-            num = num.toString();
-            while (num.length < size) num = "0" + num;
-            return num;
-        }
-        function get_number_color(number, max_number){
-            if (number == max_number) {
-                return '#ff0000';
-            } else if (number <= max_number - game.players.length) {
-                // 平均人手一张。
-                return '#00ff00';
-            } else {
-                return '#ffff00';
-            }
-        }
         function get_bank_card_number_color(bank_card) {
             if (bank_card.name == 'dcs_back') {
-                return get_number_color(bank_card.number, game.info.development_card_max_number);
+                return get_card_number_color(bank_card.number, game.info.development_card_max_number);
             } else {
-                return get_number_color(bank_card.number, game.info.resource_card_max_number);
+                return get_card_number_color(bank_card.number, game.info.resource_card_max_number);
             }
         }
 
@@ -763,7 +820,7 @@ var CatanGame = {
                 const info_card_h = game.sizes.card_h / game.sizes.card_w * info_card_w;
                 const info_card_show_pct = 1;
 
-                for (const [key, value] of Object.entries(game.player.info)) {
+                for (const [key, value] of Object.entries(player.info)) {
                     Crafty.e("2D, Canvas, " + info_sprites[key]).attr({
                         x: avatar_padding_left + avatar_size + info_card_w * info_card_show_pct * info_index + info_card_length * 0.05,
                         y: info_card_padding_top,
@@ -840,15 +897,11 @@ var CatanGame = {
                         console.log('select ' + card.name);
                         this.y -= 0.15 * card_h;
                         card.selected = true;
-                        // Crafty.audio.stop("click_on");
-                        // Crafty.audio.stop("click_off");
                         Crafty.audio.play("click_on");
                     } else {
                         console.log('unselect ' + card.name);
                         this.y = y;
                         card.selected = false;
-                        // Crafty.audio.stop("click_on");
-                        // Crafty.audio.stop("click_off");
                         Crafty.audio.play("click_off", 1, 0.5);
                     }
 
@@ -875,78 +928,17 @@ var CatanGame = {
             game.load_info();
         }
 
-		// 加载所有声音和图片sprites
-        // https://craftyjs.com/api/Crafty-audio.html#Crafty-audio-play
-        game.load_assets = function() {
-            const loading_text_h = 50;
-            const loading_bar_h = 50;
-            const loading_color = "#006600"
-            var loading_text = Crafty.e("2D, DOM, Text")
-                .attr({
-                    x: left_panel_w + map_w / 3,
-                    y: map_h / 2,
-                    w: map_w / 3,
-                    h: loading_text_h,
-                })
-                .text("Loading...")
-                .css({ "text-align": "center" })
-                .textColor(loading_color)
-                .textFont({ type: 'italic', family: 'Arial', size: `${loading_text_h * 0.8}px`, weight: 'bold'});
-
-            Crafty.e("2D, DOM, ProgressBar")
-                .attr({
-                    x: left_panel_w + map_w / 3,
-                    y: map_h / 2 + loading_text_h,
-                    w: map_w / 3,
-                    h: loading_bar_h,
-                    z: 100
-                })
-                // progressBar(Number maxValue, Boolean flipDirection, String emptyColor, String filledColor)
-                .progressBar(100, false, "grey", loading_color)
-                .bind("LOADING_PROGRESS", function(percent) {
-                    // updateBarProgress(Number currentValue)
-                    this.updateBarProgress(percent);
-                });
-
-            var loaded = function() {
-                Crafty.scene("main");
-            }
-            var progress = function(e) {
-                // console.log("loading");
-                const pct = Math.floor(e.percent);
-                var text;
-                if (pct >= 100) {
-                    text = "加载完毕";
-                }
-                else if (pct >= 80) {
-                    text = "展开贸易";
-                }
-                else if (pct >= 60) {
-                    text = "修建设施";
-                }
-                else if (pct >= 40) {
-                    text = "居民入住";
-                }
-                else if (pct >= 20) {
-                    text = "填充陆地";
-                }
-                else {
-                    text = "开拓海洋"
-                }
-                loading_text.text(`${pct}%: ${text}...`)
-                Crafty.trigger("LOADING_PROGRESS", e.percent);
-            };
-            var error_loading = function(e) {
-                console.log("loading error"); console.log(e);
-            };
-            Crafty.load(assets, loaded, progress, error_loading);
-        }
-
         game.run = function() {
             Crafty.init(w, h, document.getElementById(area));
             // color: #f2d2a9
             Crafty.background('rgb(84,153,202)');
-
+            game = catan_add_loading_scene(
+                game,
+                left_panel_w + map_w / 4,  // left
+                map_h / 3,  // top
+                map_w / 2,  // width
+                map_h / 16, // info_height
+            )
             Crafty.scene("main", game.load_main_scene);
             Crafty.scene("loading", game.load_assets);
             Crafty.scene("loading");
