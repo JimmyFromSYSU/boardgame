@@ -157,7 +157,6 @@ var catan_load_buttons = function(game) {
         game.destroy_cards_e(game.control.trade_pay_cards);
         selected_cards.forEach((card, index) => {
             var trade_card = {name: card.name}
-            console.log(`${game.sizes.trade_card_l}, ${game.sizes.pay_cards_t}, ${index}, ${show_pct}`);
             trade_card.e = Crafty.e("2D, DOM, Mouse, card_" + card.name).attr({
                 x: game.sizes.trade_card_l + game.sizes.trade_card_w * show_pct * index,
                 y: game.sizes.pay_cards_t,
@@ -202,12 +201,13 @@ var catan_load_buttons = function(game) {
      * 发起贸易
     \***********************************/
     game.set_wait_trade_button = function() {
-        game.control.main_text.e.text("取消交易");
+        // game.control.main_text.e.text("取消交易");
+        game.control.main_text.e.text("");
         game.enable_button(game.control.no_btn, game.set_default_button, "click_off");
         game.disable_button(game.control.yes_btn);
     };
     game.set_start_trade_button = function() {
-        game.control.main_text.e.text("发送贸易请求");
+        game.control.main_text.e.text("发送贸易请求？");
         game.enable_button(game.control.no_btn, game.set_default_button, "click_off");
         game.enable_button(game.control.yes_btn, game.send_trade_request);
     };
@@ -228,8 +228,10 @@ var catan_load_buttons = function(game) {
         game.control.select_player_panel.e.visible = visible;
         game.control.select_player_text.e.visible = visible;
         game.players.forEach((player, index) => {
-            player.e.visible = visible;
-            player.frame_e.visible = visible;
+            if (index != 0) {
+                player.e.visible = visible;
+                player.frame_e.visible = visible;
+            }
         });
     }
 
@@ -265,7 +267,7 @@ var catan_load_buttons = function(game) {
 
         const yn_btn_left = game.sizes.left_panel_w + game.sizes.map_w;
         const yn_btn_top = game.sizes.map_h + text_height;
-        const yn_btn_w = game.sizes.right_panel_w / 3;
+        const yn_btn_w = game.sizes.right_panel_w / 3.3;
         const yn_btn_h = height - text_height;
 
         const yn_text_left = yn_btn_left;
@@ -367,9 +369,10 @@ var catan_load_buttons = function(game) {
     game.load_dices = function() {
         const dice_left = game.sizes.left_panel_w / 3;
         // const dice_top = map_h + text_height;
-        const dice_top = game.sizes.map_h + game.sizes.panel_h / 6;
-        const dice_w = game.sizes.left_panel_w / 3;
-        const dice_h = dice_w; // height - text_height;
+        const dice_top = game.sizes.map_h + game.sizes.panel_h * 0.05;
+        // const dice_w = game.sizes.left_panel_w / 3;
+        const dice_h = game.sizes.panel_h * 0.9; // height - text_height;
+        const dice_w = dice_h;
 
         // Dice button
         dice1 = Crafty.e("2D, Canvas, Mouse, SpriteAnimation, dice1").attr({
@@ -415,8 +418,8 @@ var catan_load_buttons = function(game) {
         game.sizes.trade_card_h = game.sizes.card_h;
         game.sizes.trade_panel_l = trade_panel_l;
         game.sizes.trade_panel_r = trade_panel_l + game.sizes.right_panel_w;
-        game.sizes.trade_card_l = game.sizes.trade_panel_l + game.sizes.trade_card_w / 4;
-        game.sizes.trade_card_r = game.sizes.trade_panel_r - game.sizes.trade_card_w / 4;
+        game.sizes.trade_card_l = game.sizes.trade_panel_l + game.sizes.trade_card_w / 3;
+        game.sizes.trade_card_r = game.sizes.trade_panel_r - game.sizes.trade_card_w / 3;
 
         game.sizes.pay_cards_panel_l = trade_panel_l;
         game.sizes.pay_cards_panel_t = trade_panel_t + panel_h * 3;
@@ -428,21 +431,22 @@ var catan_load_buttons = function(game) {
 
         const select_card_info_text_height = panel_h / 4;
         game.sizes.select_card_panel_t = trade_panel_t + panel_h;
-        const select_card_info_text_t = game.sizes.select_card_panel_t + game.sizes.trade_card_h / 4;
-        game.sizes.select_card_t = game.sizes.select_card_panel_t + game.sizes.trade_card_h / 4 + select_card_info_text_height;
+        const select_card_info_text_t = game.sizes.select_card_panel_t + panel_h / 10;
+        game.sizes.select_card_t = game.sizes.select_card_panel_t + panel_h / 10 + select_card_info_text_height;
 
+        game.sizes.select_player_panel_t = trade_panel_t + panel_h;
         const select_player_info_text_height = panel_h / 4;
-        const select_player_info_text_t = trade_panel_t + game.sizes.trade_card_h / 4;
-        game.sizes.select_player_panel_t = trade_panel_t;
+        const select_player_info_text_t = game.sizes.select_player_panel_t + game.sizes.trade_card_h / 4;
+
         game.sizes.select_player_t = game.sizes.select_player_panel_t + game.sizes.trade_card_h / 4 + select_player_info_text_height;
 
-        const button_card_w = game.sizes.trade_card_w * 2 / 3;
-        const button_card_h = game.sizes.trade_card_h * 2 / 3;
+        const button_card_w = game.sizes.trade_card_w * 4 / 5;
+        const button_card_h = game.sizes.trade_card_h * 4 / 5;
 
         // player select panel
         game.control.select_player_panel.e =Crafty.e("2D, Canvas, panel").attr({
             x: trade_panel_l,
-            y: trade_panel_t,
+            y: game.sizes.select_player_panel_t,
             z: 0,
             w: game.sizes.right_panel_w,
             h: panel_h,
@@ -456,35 +460,45 @@ var catan_load_buttons = function(game) {
             .textColor('#338811')
             .textFont({ type: 'italic', family: 'Arial', size: `${select_player_info_text_height/2}px`, weight: 'bold'});
 
-        const player_show_pct =  game.get_trade_panel_show_pct(
-            game.players.length, button_card_w, 1.2
-        );
 
         const avatar_size = button_card_w * 0.8;
         const avatar_frame_size = button_card_w;
-        const padding = (avatar_frame_size - avatar_size) / 2;
+        const frame_padding = (avatar_frame_size - avatar_size) / 2;
+        const panel_padding = avatar_size * 2 / 3;
+        game.sizes.trade_avatar_l = game.sizes.trade_panel_l + panel_padding;
+
+        const player_show_pct = game.get_show_pct(
+            game.sizes.trade_panel_r - game.sizes.trade_panel_l - panel_padding * 2,
+            game.players.length - 1,
+            avatar_frame_size,
+            1.5,
+        );
+
         game.players.forEach((player, index) => {
-            player.e = Crafty.e("2D, Canvas, Mouse," + player.sprite).attr({
-                x: game.sizes.trade_card_l + button_card_w * player_show_pct * index + padding,
-                y: game.sizes.select_player_t + padding,
-                anchor_x: game.sizes.trade_card_l + button_card_w * player_show_pct * index,
-                anchor_y: game.sizes.select_player_t,
-                name: player.name,
-                z: 11,
-                w: avatar_size,
-                h: avatar_size,
-            });
-            player.frame_e = Crafty.e("2D, Canvas, Color").attr({
-                x: game.sizes.trade_card_l + button_card_w * player_show_pct * index,
-                y: game.sizes.select_player_t,
-                anchor_x: game.sizes.trade_card_l + button_card_w * player_show_pct * index,
-                anchor_y: game.sizes.select_player_t,
-                name: player.name,
-                z: 10,
-                w: avatar_frame_size,
-                h: avatar_frame_size,
-            }).color(player.color);
-            // game.set_button_movement(card.e, game.select_buy_card(card.name));
+            if (index != 0) {
+                index = index - 1;
+                player.e = Crafty.e("2D, Canvas, Mouse," + player.sprite).attr({
+                    x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index + frame_padding,
+                    y: game.sizes.select_player_t + frame_padding,
+                    anchor_x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index + frame_padding,
+                    anchor_y: game.sizes.select_player_t + frame_padding,
+                    name: player.name,
+                    z: 11,
+                    w: avatar_size,
+                    h: avatar_size,
+                });
+                player.frame_e = Crafty.e("2D, Canvas, Color").attr({
+                    x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
+                    y: game.sizes.select_player_t,
+                    anchor_x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
+                    anchor_y: game.sizes.select_player_t,
+                    name: player.name,
+                    z: 10,
+                    w: avatar_frame_size,
+                    h: avatar_frame_size,
+                }).color(player.color);
+                // game.set_button_movement(card.e, game.select_buy_card(card.name));
+            }
         });
 
 
@@ -506,7 +520,7 @@ var catan_load_buttons = function(game) {
         ];
 
         const button_card_show_pct =  game.get_trade_panel_show_pct(
-            game.control.button_cards.length, button_card_w, 1.2
+            game.control.button_cards.length, button_card_w, 2
         );
         game.select_buy_card = function(name) {
             return function() {
@@ -519,7 +533,9 @@ var catan_load_buttons = function(game) {
         game.control.select_card_text.e = Crafty.e("2D, DOM, Text").attr({
                 x: game.sizes.trade_card_l,
                 y: select_card_info_text_t,
-                w: game.sizes.right_panel_w, h: select_card_info_text_height})
+                w: game.sizes.right_panel_w,
+                h: select_card_info_text_height
+            })
             .text("选择你想获得的牌")
             .textColor('#338811')
             .textFont({ type: 'italic', family: 'Arial', size: `${select_card_info_text_height/2}px`, weight: 'bold'});

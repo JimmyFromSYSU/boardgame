@@ -12,11 +12,57 @@ var CatanGame = {
             id: 1,
             sprite: 'player_id_1',
             color: 'blue',
+            info: {
+                resource_card: 10,
+                development_card: 2,
+                score: 3,
+                knight: 0,
+                road: 5,
+            },
         };
+
         game.players = [
             game.player,
-            {name: '时涛', id: 2, sprite: 'player_id_2', color: 'red',},
-            {name: '古今', id: 3, sprite: 'player_id_3', color: 'green',},
+            {
+                name: '时涛',
+                id: 2,
+                sprite: 'player_id_2',
+                color: 'red',
+                info: {
+                    resource_card: 5,
+                    development_card: 1,
+                    score: 1,
+                    knight: 1,
+                    road: 5,
+                },
+            },
+            {
+                name: '古今',
+                id: 3,
+                sprite: 'player_id_3',
+                color: 'orange',
+                info: {
+                    resource_card: 10,
+                    development_card: 0,
+                    score: 5,
+                    knight: 0,
+                    road: 3,
+                },
+            },
+            {
+                name: '玩家1', id: 4, sprite: 'avatar3', color: 'yellow',
+                info: {
+                    resource_card: 3,
+                    development_card: 0,
+                    score: 2,
+                    knight: 2,
+                    road: 2,
+                },
+            },
+            // {name: '玩家2', id: 5, sprite: 'avatar2', color: 'green',},
+            // {name: '玩家3', id: 6, sprite: 'avatar1', color: 'purple',},
+            // {name: '小智', id: 7, sprite: 'player_id_1', color: 'purple',},
+            // {name: '时涛', id: 8, sprite: 'player_id_2', color: 'black',},
         ];
 
         /***********************************\
@@ -249,9 +295,10 @@ var CatanGame = {
         var row = game.board.row;
 
         var w = window.innerWidth * 0.98;
-        var left_panel_w = w * 0.2;
-        var right_panel_w = w * 0.2;
-        var map_w = w * 0.6;
+        var map_w = w * 0.6 * (19 / 24) * (col / row);
+        var map_w_ratio = map_w / w;
+        var left_panel_w = w * (1 - map_w_ratio) / 2;
+        var right_panel_w = w * (1 - map_w_ratio) / 2;
 
         // 显示中tile的大小
         var tile_w = map_w / col;
@@ -286,37 +333,6 @@ var CatanGame = {
             // 技能卡添加按钮x位置
             plus_card_x: plus_card_x,
         };
-
-        /***********************************\
-		 * 加载所有的图片
-		\***********************************/
-        game.load_images = function() {
-            Crafty.sprite(panel_image_file, {'panel': [0, 0, panel_image_w, panel_image_h]});
-            Crafty.sprite(trade_image_file, {'trade': [0, 0, trade_image_w, trade_image_h]});
-            Crafty.sprite(single_dice_image_w, single_dice_image_h, dice_image_file,
-                {
-                    'dice1': [0, 0],
-                    'dice2': [1, 0],
-                    'dice3': [2, 0],
-                }
-            );
-            for (const [image_type, image_data] of Object.entries(images)) {
-                for (const [key, value] of Object.entries(image_data.files)) {
-                    var loc = {};
-                    loc[image_type + '_' + key] = [0, 0, image_data.width, image_data.height]
-                    Crafty.sprite(value, loc);
-                }
-            }
-        };
-
-        /***********************************\
-		 * 加载所有的声音
-		\***********************************/
-        // https://craftyjs.com/api/Crafty-audio.html#Crafty-audio-play
-        game.load_sounds = function() {
-            var callback = function(){};
-            Crafty.load(sounds, callback);
-        }
 
         /***********************************\
 		 * 加载地图
@@ -585,6 +601,193 @@ var CatanGame = {
         game = catan_load_buttons(game);
 
         /***********************************\
+		 * 加载所有info
+		\***********************************/
+        info_sprites = {
+            'resource_card': 'card_back',
+            'development_card': 'card_dcs_back',
+            'score': 'card_score',
+            'knight': 'card_maximum_knight',
+            'road': 'card_longest_road',
+        };
+        game.info = {
+            resource_card_max_number: 19,
+            development_card_max_number: 25,
+            bank_cards: [
+                {'name': 'lumber', number: 19},
+                {'name': 'brick', number: 18},
+                {'name': 'wool', number: 17},
+                {'name': 'grain', number: 14},
+                {'name': 'ore', number: 13},
+                {'name': 'dcs_back', number: 25},
+            ],
+        };
+        function pad(num, size) {
+            num = num.toString();
+            while (num.length < size) num = "0" + num;
+            return num;
+        }
+        function get_number_color(number, max_number){
+            if (number == max_number) {
+                return '#ff0000';
+            } else if (number <= max_number - game.players.length) {
+                // 平均人手一张。
+                return '#00ff00';
+            } else {
+                return '#ffff00';
+            }
+        }
+        function get_bank_card_number_color(bank_card) {
+            if (bank_card.name == 'dcs_back') {
+                return get_number_color(bank_card.number, game.info.development_card_max_number);
+            } else {
+                return get_number_color(bank_card.number, game.info.resource_card_max_number);
+            }
+        }
+
+        game.load_info = function() {
+            // const bank_info_h = panel_h * 7 / 10;
+            // const player_info_h = panel_h * 8 / 10;
+            const estimated_bank_info_h = map_h / (game.players.length + 1);
+            const max_bank_info_h = left_panel_w / 3;
+            const bank_info_h = estimated_bank_info_h < max_bank_info_h
+                ? estimated_bank_info_h
+                : max_bank_info_h;
+
+            const estimated_player_info_h = map_h / (game.players.length + 1);
+            const max_player_info_h = left_panel_w / 3;
+            const player_info_h = estimated_player_info_h < max_player_info_h
+                ? estimated_player_info_h
+                : max_player_info_h;
+            // const player_info_h = map_h / (game.players.length + 1);
+
+            const avatar_size = player_info_h / 2;
+            const avatar_padding_top = avatar_size / 2;
+            const avatar_padding_left = avatar_size / 2;
+            const avatar_padding_right = avatar_padding_left;
+
+            const bank_size = bank_info_h / 2;
+            const bank_padding_top = bank_size / 2;
+            const bank_padding_left = bank_size / 2;
+            const bank_padding_right = bank_padding_left;
+
+            const player_frame_padding_lr = left_panel_w / 35;
+            const player_frame_padding_td = player_info_h / 60;
+            Crafty.e("2D, Canvas, panel").attr({
+                x: 0,
+                y: 0,
+                z: 1,
+                w: left_panel_w,
+                h: bank_info_h,
+            });
+            Crafty.e("2D, Canvas, player_bank").attr({
+                x: bank_padding_left,
+                y: bank_padding_top,
+                z: 10,
+                w: bank_size,
+                h: bank_size,
+            });
+            Crafty.e("2D, Canvas, player_bank").attr({
+                x: bank_padding_left,
+                y: bank_padding_top,
+                z: 10,
+                w: bank_size,
+                h: bank_size,
+            });
+
+            const bank_card_length = left_panel_w - bank_padding_left - bank_size - bank_padding_right;
+            const bank_card_w = bank_card_length /  game.info.bank_cards.length;
+            const bank_card_h = game.sizes.card_h / game.sizes.card_w * bank_card_w;
+            const bank_card_show_pct =  1;
+            const bank_card_number_text_height = bank_info_h / 3;
+            const bank_card_padding_top = bank_info_h - bank_card_h - bank_card_number_text_height;
+
+            game.info.bank_cards.forEach((bank_card, index) => {
+                bank_card.e = Crafty.e("2D, Canvas, card_" + bank_card.name).attr({
+                    x: bank_padding_left + bank_size + bank_card_w * bank_card_show_pct * index,
+                    y: bank_card_padding_top,
+                    z: 10,
+                    w: bank_card_w,
+                    h: bank_card_h,
+                });
+                Crafty.e("2D, DOM, Text").attr({
+                    x: bank_padding_left + bank_size + bank_card_w * bank_card_show_pct * index + bank_card_w / 4,
+                    y: bank_card_padding_top + bank_card_h,
+                    z: 11,
+                    w: bank_card_w,
+                    h: bank_card_h
+                })
+                .text(pad(bank_card.number, 2))
+                .textColor(get_bank_card_number_color(bank_card))
+                .textFont({family: 'Arial', size: `${bank_card_h / 3}px`, weight: 'bold'});
+            });
+
+            game.players.forEach((player, index) => {
+                const panel_padding_ratio = 0.01;
+                const d_lr = panel_padding_ratio * left_panel_w;
+                const d_td = panel_padding_ratio * player_info_h;
+                Crafty.e("2D, Canvas, panel").attr({
+                    x: d_lr,
+                    y: bank_info_h + index * player_info_h + d_td,
+                    z: 1,
+                    w: left_panel_w - 2 * d_lr,
+                    h: player_info_h - 2 * d_td,
+                });
+
+                Crafty.e("2D, Canvas, Color").attr({
+                    x: player_frame_padding_lr,
+                    y: bank_info_h + index * player_info_h + player_frame_padding_td,
+                    z: 0,
+                    w: left_panel_w - player_frame_padding_lr * 2,
+                    h: player_info_h - player_frame_padding_td * 2,
+                }).color(player.color);
+
+                Crafty.e("2D, Canvas, Mouse," + player.sprite).attr({
+                    x: avatar_padding_left,
+                    y: bank_info_h + index * player_info_h + avatar_padding_top,
+                    name: player.name,
+                    z: 10,
+                    w: avatar_size,
+                    h: avatar_size,
+                });
+
+                info_index = 0;
+                const info_card_number_text_height = player_info_h / 3;
+                const info_card_padding_top = (
+                    bank_info_h + player_info_h * (1 + index)
+                    - bank_card_h - info_card_number_text_height
+                );
+
+                const info_card_length = left_panel_w - avatar_padding_left - avatar_size - avatar_padding_right;
+                const info_card_w = info_card_length * 0.9 /  Object.entries(game.player.info).length;
+                const info_card_h = game.sizes.card_h / game.sizes.card_w * info_card_w;
+                const info_card_show_pct = 1;
+
+                for (const [key, value] of Object.entries(game.player.info)) {
+                    Crafty.e("2D, Canvas, " + info_sprites[key]).attr({
+                        x: avatar_padding_left + avatar_size + info_card_w * info_card_show_pct * info_index + info_card_length * 0.05,
+                        y: info_card_padding_top,
+                        z: 10,
+                        w: info_card_w,
+                        h: info_card_h,
+                    });
+                    Crafty.e("2D, DOM, Text").attr({
+                        x: avatar_padding_left + avatar_size + info_card_w * info_card_show_pct * info_index + info_card_length * 0.05 + info_card_w / 4,
+                        y: info_card_padding_top + info_card_h,
+                        z: 11,
+                        w: info_card_w,
+                        h: info_card_h
+                    })
+                    .text(pad(value, 2))
+                    .textColor(player.color)
+                    .textFont({family: 'Arial', size: `${info_card_h / 3}px`, weight: 'bold'});
+                    info_index = info_index + 1;
+                };
+            });
+        }
+
+
+        /***********************************\
 		 * 加载所有的牌
 		\***********************************/
         game.get_show_pct = function(max_len, num_cards, card_w, max_pct = 0.8) {
@@ -664,17 +867,89 @@ var CatanGame = {
         /***********************************\
 		 * 开始运行游戏
 		\***********************************/
-        game.run = function() {
-            Crafty.init(w, h, document.getElementById(area));
-            // #f2d2a9
-            Crafty.background('rgb(84,153,202)');
-
-            game.load_images();
-            game.load_sounds();
+        // 加载主场景
+        game.load_main_scene = function() {
             game.load_map();
             game.load_cards();
             game.load_main_button();
-            // game.start();
+            game.load_info();
+        }
+
+		// 加载所有声音和图片sprites
+        // https://craftyjs.com/api/Crafty-audio.html#Crafty-audio-play
+        game.load_assets = function() {
+            const loading_text_h = 50;
+            const loading_bar_h = 50;
+            const loading_color = "#006600"
+            var loading_text = Crafty.e("2D, DOM, Text")
+                .attr({
+                    x: left_panel_w + map_w / 3,
+                    y: map_h / 2,
+                    w: map_w / 3,
+                    h: loading_text_h,
+                })
+                .text("Loading...")
+                .css({ "text-align": "center" })
+                .textColor(loading_color)
+                .textFont({ type: 'italic', family: 'Arial', size: `${loading_text_h * 0.8}px`, weight: 'bold'});
+
+            Crafty.e("2D, DOM, ProgressBar")
+                .attr({
+                    x: left_panel_w + map_w / 3,
+                    y: map_h / 2 + loading_text_h,
+                    w: map_w / 3,
+                    h: loading_bar_h,
+                    z: 100
+                })
+                // progressBar(Number maxValue, Boolean flipDirection, String emptyColor, String filledColor)
+                .progressBar(100, false, "grey", loading_color)
+                .bind("LOADING_PROGRESS", function(percent) {
+                    // updateBarProgress(Number currentValue)
+                    this.updateBarProgress(percent);
+                });
+
+            var loaded = function() {
+                Crafty.scene("main");
+            }
+            var progress = function(e) {
+                // console.log("loading");
+                const pct = Math.floor(e.percent);
+                var text;
+                if (pct >= 100) {
+                    text = "加载完毕";
+                }
+                else if (pct >= 80) {
+                    text = "展开贸易";
+                }
+                else if (pct >= 60) {
+                    text = "修建设施";
+                }
+                else if (pct >= 40) {
+                    text = "居民入住";
+                }
+                else if (pct >= 20) {
+                    text = "填充陆地";
+                }
+                else {
+                    text = "开拓海洋"
+                }
+                loading_text.text(`${pct}%: ${text}...`)
+                Crafty.trigger("LOADING_PROGRESS", e.percent);
+            };
+            var error_loading = function(e) {
+                console.log("loading error"); console.log(e);
+            };
+            Crafty.load(assets, loaded, progress, error_loading);
+        }
+
+        game.run = function() {
+            Crafty.init(w, h, document.getElementById(area));
+            // color: #f2d2a9
+            Crafty.background('rgb(84,153,202)');
+
+            Crafty.scene("main", game.load_main_scene);
+            Crafty.scene("loading", game.load_assets);
+            Crafty.scene("loading");
         }
 
         return game;
