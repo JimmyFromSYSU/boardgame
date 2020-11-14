@@ -8,8 +8,14 @@
 
 {% block js %}
 <script src="{% static 'catan/catan_maps.js' %}"></script>
-<script src="{% static 'catan/catan_images.js' %}"></script>
+<script src="{% static 'catan/catan_assets.js' %}"></script>
 <script src="{% static 'catan/catan_cards.js' %}"></script>
+
+<!-- https://github.com/mucaho/crafty-component-progressbar -->
+<script src="{% static 'base/ProgressBar.js' %}"></script>
+<script src="{% static 'catan/catan_loading.js' %}"></script>
+
+<script src="{% static 'catan/catan_buttons.js' %}"></script>
 <script src="{% static 'catan/catan.js' %}"></script>
 {% endblock %}
 
