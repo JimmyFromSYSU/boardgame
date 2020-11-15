@@ -32,14 +32,29 @@ class CantanMap(models.Model):
     dice = models.ForeignKey(Dice, on_delete=models.CASCADE)
 
 
-class CantanGame(models.Model):
-    game_id = models.AutoField(primary_key=True)
-    map = models.OneToOneField(CantanMap, on_delete=models.CASCADE)
+class Game(models.Model):
+    SETTLE = 'ST'
+    MAIN = 'MA'
+    END = 'ED'
+    GAME_STATUS = [
+        (SETTLE, 'Settle'),
+        (MAIN, 'Main'),
+        (END, 'End'),
+    ]
+
+    map_name = models.CharField(max_length=200)
+    turn_id = models.IntegerField(default=0)
+    status = models.CharField(
+        max_length=2,
+        choices=GAME_STATUS,
+        default=MAIN)
+    number_of_player = models.PositiveIntegerField(default=2)
+    current_player_id = models.IntegerField()
 
 
 class Player(models.Model):
     score = models.IntegerField(default=0)
-    game = models.ForeignKey(CantanGame, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
     resource_cards = models.ManyToManyField(Resource)
     development_cards = models.ManyToManyField(Development)
 
