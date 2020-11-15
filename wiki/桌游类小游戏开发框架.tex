@@ -121,7 +121,7 @@
 
 \setlength{\droptitle}{-18em}
 \title{\fontsize{40}{20} \textbf{\textcolor{red}{\kaishu 桌游类小游戏开发框架}}}
-\author{\textcolor{red}{南方小智}}
+\author{\textcolor{red}{南方小智，Michael Gu}}
 \date{\textcolor{red}{\today}}
 
 
@@ -136,16 +136,43 @@
 \tableofcontents
 \newpage
 
-\begin{center}
-\input{wiki/images/image0.tex}
-\end{center}
 
 
 \chapter{概述}
 
-本项目用于实现各类桌游小游戏的游戏流程，AI玩家，对弈平台等。目前正在开发中国象棋的基本游戏流程和AI算法。
+本项目用于实现各类桌游小游戏的游戏流程，AI玩家，对弈平台等。目前正在开发Catan岛和中国象棋。
 
 \section{安装与设置}
+
+\subsection{Django}
+安装\href{https://www.djangoproject.com/}{Django}
+
+
+\subsection{Vue}
+安装Vue.js
+
+
+\begin{itemize}
+\item{ \href{https://www.youtube.com/watch?v=bI5jpueiCWw\&t=756s}{Vue.js tutorial 1} }
+\item{ \href{https://www.youtube.com/watch?v=xq532yn8gMA\&t=2608s}{Vue.js turorial 2} }
+\end{itemize}
+
+
+\subsection{Bootstrap}
+
+安装bootstrap
+
+\subsection{Crafty}
+js游戏引擎: \href{https://github.com/craftyjs/Crafty}{Crafty}
+
+\subsection{Websocket}
+
+\href{https://www.youtube.com/watch?v=RVH05S1qab8\&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt\&index=1\&t=3148s}{Websocket tutorial}
+
+\subsection{Python Lib}
+
+安装termcolor：
+
 \begin{lstlisting}[language=Bash]
 python3 -m pip install termcolor
 \end{lstlisting}
@@ -194,6 +221,9 @@ Judge还可以用于控制游戏状态和流程，比如实现回退，保存局
 Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经过若干轮，每轮以其中一位Player为主，并由Judge执行操作。最后利用Judge判断游戏结束和得出胜利玩家列表。
 
 \chapter{卡坦岛设计}
+\begin{center}\begin{figure}[H] \centering \includegraphics[max size={\textwidth}{\textheight},keepaspectratio]
+{images/README/catan.png}\caption*{}
+\end{figure} \end{center}
 
 \section{游戏状态转换}
 
@@ -202,6 +232,27 @@ Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经�
 \end{figure} \end{center}
 
 \section{坐标系设计}
+\begin{center}\begin{figure}[H] \centering \includegraphics[max size={\textwidth}{\textheight},keepaspectratio]
+{images/README/catan_location.png}\caption*{}
+\end{figure} \end{center}
+
+
+\section{数据库设计}
+
+\begin{center}\begin{figure}[H] \centering \includegraphics[max size={\textwidth}{\textheight},keepaspectratio]
+{images/README/catan_db.png}\caption*{数据库设计}
+\end{figure} \end{center}
+
+具体请查看google doc：\href{https://docs.google.com/document/d/1gYzo6ib2sot4ynA650sstkFq2iVueK_y3jLf3UaaeWU/edit?usp=sharing}{Catan Design}
+
+\chapter{中国象棋}
+
+\begin{center}
+\input{wiki/images/image0.tex}
+\end{center}
+
+
+\chapter{德州扑克}
 
 \chapter{AI设计}
 
@@ -259,12 +310,6 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
 \begin{itemize}
 \item{ 第一阶段：所有前后台连接，实现基本的游戏状态。
 \begin{itemize}
-\item{ 前台：js/html/css + vue.js + js game engine: \href{https://github.com/craftyjs/Crafty}{Crafty} }
-\item{ \href{https://github.com/collections/javascript-game-engines}{More js game engine} }
-\item{ \href{https://www.youtube.com/watch?v=bI5jpueiCWw\&t=756s}{Vue.js tutorial 1} }
-\item{ \href{https://www.youtube.com/watch?v=xq532yn8gMA\&t=2608s}{Vue.js turorial 2} }
-\item{ 后台：django }
-\item{ Websocket: \href{https://www.youtube.com/watch?v=RVH05S1qab8\&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt\&index=1\&t=3148s}{tutorial} }
 \item{ 图片资源 }
 \item{ 游戏流程 }
 \end{itemize}

@@ -419,10 +419,6 @@ var CatanGame = {
                     w: w,
                     h: h,
                 });
-                // game.set_toggle(touch_area);
-                // game.set_click_tile_obj(touch_area, tile);
-
-
             }
 
             if (tile.harbor) {
