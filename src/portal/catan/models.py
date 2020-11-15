@@ -32,6 +32,13 @@ class CantanMap(models.Model):
     dice = models.ForeignKey(Dice, on_delete=models.CASCADE)
 
 
+class Player(models.Model):
+    score = models.IntegerField(default=0)
+    game = models.ForeignKey('Game', on_delete=models.CASCADE)
+    resource_cards = models.ManyToManyField(Resource)
+    development_cards = models.ManyToManyField(Development)
+
+
 class Game(models.Model):
     SETTLE = 'ST'
     MAIN = 'MA'
@@ -49,14 +56,7 @@ class Game(models.Model):
         choices=GAME_STATUS,
         default=MAIN)
     number_of_player = models.PositiveIntegerField(default=2)
-    current_player_id = models.IntegerField()
-
-
-class Player(models.Model):
-    score = models.IntegerField(default=0)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    resource_cards = models.ManyToManyField(Resource)
-    development_cards = models.ManyToManyField(Development)
+    current_player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name='current_game')
 
 
 class Position(models.Model):
