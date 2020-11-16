@@ -147,7 +147,7 @@ class Game(models.Model):
     status = models.CharField(
         max_length=2,
         choices=GAME_STATUS,
-        default=MAIN)
+        default=SETTLE)
     number_of_player = models.PositiveIntegerField(default=2)
     current_player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name='current_game')
 
