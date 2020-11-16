@@ -7,6 +7,10 @@
 
 
 {% block js %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
+
+
 <script src="{% static 'catan/catan_maps.js' %}"></script>
 <script src="{% static 'catan/catan_assets.js' %}"></script>
 <script src="{% static 'catan/catan_cards.js' %}"></script>
@@ -16,7 +20,9 @@
 <script src="{% static 'catan/catan_loading.js' %}"></script>
 
 <script src="{% static 'catan/catan_buttons.js' %}"></script>
+<script src="{% static 'catan/catan_websocket.js' %}"></script>
 <script src="{% static 'catan/catan.js' %}"></script>
+
 {% endblock %}
 
 

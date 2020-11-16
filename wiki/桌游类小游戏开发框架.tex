@@ -106,6 +106,13 @@
 
         
 
+\usepackage{booktabs, multirow} % for borders and merged ranges
+\usepackage{soul}% for underlines
+%\usepackage[table]{xcolor} % for cell colors
+\usepackage{changepage,threeparttable} % for wide tables
+\usepackage{longtable} % table for mutiple pages
+
+
 \usepackage{ctex}
 \usepackage{xeCJK}
 \xeCJKsetup{CJKmath=true}
@@ -168,6 +175,20 @@ js游戏引擎: \href{https://github.com/craftyjs/Crafty}{Crafty}
 \subsection{Websocket}
 
 \href{https://www.youtube.com/watch?v=RVH05S1qab8\&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt\&index=1\&t=3148s}{Websocket tutorial}
+
+\begin{lstlisting}[language=Bash]
+ # install channels
+python3 -m pip install channels
+ # install redis
+brew install redis
+ # start redis
+brew services start redis
+ # test redis
+redis-cli ping
+redis-server
+ # channels redis connection
+python3 -m pip install channels_redis
+\end{lstlisting}
 
 \subsection{Python Lib}
 
@@ -239,11 +260,9 @@ Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经�
 
 \section{数据库设计}
 
-\begin{center}\begin{figure}[H] \centering \includegraphics[max size={\textwidth}{\textheight},keepaspectratio]
-{images/README/catan_db.png}\caption*{数据库设计}
-\end{figure} \end{center}
-
 具体请查看google doc：\href{https://docs.google.com/document/d/1gYzo6ib2sot4ynA650sstkFq2iVueK_y3jLf3UaaeWU/edit?usp=sharing}{Catan Design}
+
+ \input{tables/README/db_design.tex}
 
 \chapter{中国象棋}
 

@@ -3,7 +3,7 @@
 \***********************************/
 var CatanGame = {
     createNew: function(
-        area,
+        area
     ) {
         var game = {};
         game.board = {};
@@ -20,6 +20,7 @@ var CatanGame = {
                 road: 5,
             },
         };
+        game.socket = CatanWebSocket.createNew(game)
 
         game.players = [
             game.player,
@@ -134,16 +135,101 @@ var CatanGame = {
                 return xy_id;
             }
         }
+        game.point_id_to_loc = function(id) {
+            const area = game.board.col * game.board.row;
+            var loc = {}
+            if (id >= area) {
+                loc.z = 1;
+                id = id - area;
+            } else {
+                loc.z = -1;
+            }
+            console.log(`id = ${id}, col=${game.board.col}`);
+            loc.x = Math.floor(id % game.board.col);
+            loc.y = Math.floor(id / game.board.col);
+            return loc;
+        }
         game.get_point = function (id) {
             var point = game.board.id_to_point[id];
             if(point) {
                 return point;
             } else {
-                point = {};
+                point = game.point_id_to_loc(id);
+                point.id = id;
+                console.log(`point = ${point.x}, ${point.y}, ${point.z}`);
                 game.board.points.push(point);
                 game.board.id_to_point[id] = point;
                 return point;
             }
+        }
+        game.get_point_center = function(point) {
+            const tile_center = game.get_tile_center({x: point.x, y: point.y});
+            const center = {'x': tile_center.x, 'y': tile_center.y + point.z * game.tile_h / 2};
+            return center;
+        }
+
+        /***********************************\
+		 * Build House/Town/Road
+		\***********************************/
+        game.build_house = function(data) {
+            var id = game.get_point_id({
+                x: data.x,
+                y: data.y,
+                z: data.z,
+            })
+            var point = game.get_point(id);
+            point.name = 'house';
+            const center = game.get_point_center(point)
+            const w = game.tile_h / 4;
+            const h = game.tile_h / 4;
+            point.e = Crafty.e(`2D, DOM, obj_house`).attr({
+                x: center.x - w/2,
+                y: center.y - h/2,
+                z: 4,
+                alpha: 1,
+                w: w,
+                h: h,
+            });
+        }
+        game.build_house_action = function(data) {
+            game.build_house(data)
+            Crafty.audio.stop("hammering")
+            Crafty.audio.play("hammering", 1, 0.2)
+        }
+
+        game.build_town = function(data) {
+            var id = game.get_point_id({
+                x: data.x,
+                y: data.y,
+                z: data.z,
+            })
+            var point = game.get_point(id);
+            const center = game.get_point_center(point)
+            const w = game.tile_h / 4;
+            const h = game.tile_h / 4;
+            var house_e = point.e;
+            point.name = 'town';
+            point.e = Crafty.e(`2D, DOM, obj_town`).attr({
+                x: center.x - w * 3 / 4,
+                y: center.y - h * 3 / 4,
+                z: 5,
+                alpha: 1,
+                w: w * 1.4,
+                h: h * 1.4,
+            });
+
+            // TODO: 统一管理哪些touch_e能够被点击
+            if (point.touch_e) {
+                point.touch_e.unbind('Click');
+            }
+
+            house_e.destroy();
+
+        }
+        game.build_town_action = function(data) {
+            game.build_town(data)
+            Crafty.audio.stop("drilling");
+            Crafty.audio.play("drilling", 1, 0.2);
         }
         /***********************************\
 		 * 设置所有edge上元素
@@ -320,6 +406,7 @@ var CatanGame = {
         var row = game.board.row;
 
         var w = window.innerWidth * 0.98;
+
         var map_w = w * 0.6 * (19 / 24) * (col / row);
         var map_w_ratio = map_w / w;
         var left_panel_w = w * (1 - map_w_ratio) / 2;
@@ -338,6 +425,10 @@ var CatanGame = {
 
         var left_card_x = left_panel_w + map_w * 0.05;
         var plus_card_x = left_panel_w + map_w - card_w - map_w * 0.05;
+
+        game.w = w;
+        game.h = h;
+        game.tile_h = tile_h;
 
         game.sizes = {
             map_col: col,
@@ -492,25 +583,19 @@ var CatanGame = {
         game.set_click_point_obj = function(e, w, h) {
             e.bind('Click', function(MouseEvent){
                 var point = game.get_point(e.id);
+                point.touch_e = e;
                 // 是否已有entity。
                 if (point.e) {
                     // 已有house，升级成town
                     if (point.name == 'house') {
                         console.log("add a town");
-                        var house_e = point.e;
-                        point.name = 'town';
-                        point.e = Crafty.e(`2D, DOM, obj_town`).attr({
-                            x: e.center_x - w * 3 / 4,
-                            y: e.center_y - h * 3 / 4,
-                            z: 5,
-                            alpha: 1,
-                            w: w * 1.4,
-                            h: h * 1.4,
+                        data = JSON.stringify({
+                            'action': 'BUILD_TOWN',
+                            'x': point.x,
+                            'y': point.y,
+                            'z': point.z,
                         });
-                        e.unbind('Click');
-                        house_e.destroy();
-                        Crafty.audio.stop("drilling");
-                        Crafty.audio.play("drilling", 1, 0.2);
+                        game.socket.send(data);
                     // 已经是town
                     } else {
                         e.unbind('Click');
@@ -518,17 +603,13 @@ var CatanGame = {
                 } else {
                     // 未有house和town
                     console.log("add a house");
-                    point.name = 'house';
-                    point.e = Crafty.e(`2D, DOM, obj_house`).attr({
-                        x: e.center_x - w/2,
-                        y: e.center_y - h/2,
-                        z: 4,
-                        alpha: 1,
-                        w: w,
-                        h: h,
+                    data = JSON.stringify({
+                        'action': 'BUILD_HOUSE',
+                        'x': point.x,
+                        'y': point.y,
+                        'z': point.z,
                     });
-                    Crafty.audio.stop("hammering");
-                    Crafty.audio.play("hammering", 1, 0.2);
+                    game.socket.send(data);
                 }
             })
         }

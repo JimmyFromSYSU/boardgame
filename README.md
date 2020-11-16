@@ -27,6 +27,20 @@ js游戏引擎: [Crafty](https://github.com/craftyjs/Crafty)
 
 [Websocket tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
 
+```
+ # install channels
+python3 -m pip install channels
+ # install redis
+brew install redis
+ # start redis
+brew services start redis
+ # test redis
+redis-cli ping
+redis-server
+ # channels redis connection
+python3 -m pip install channels_redis
+```
+
 #### Python Lib
 
 安装termcolor：
@@ -89,9 +103,9 @@ Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经�
 
 ### 数据库设计
 
-![数据库设计](images/README/catan_db.png)
-
 具体请查看google doc：[Catan Design](https://docs.google.com/document/d/1gYzo6ib2sot4ynA650sstkFq2iVueK_y3jLf3UaaeWU/edit?usp=sharing)
+
+ {{tables/README/db_design.tex}}[text]
 
 ## 中国象棋
 
