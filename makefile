@@ -10,7 +10,7 @@ server:
 	python src/portal/manage.py runserver 0.0.0.0:5001
 
 readme:
-	python3 ../latex/create_book.py --path README.md --name 桌游类小游戏开发框架 --author "南方小智" --output wiki
+	python3 ../latex/create_book.py --path README.md --name 桌游类小游戏开发框架 --author "南方小智，Michael Gu" --output wiki
 	@echo 'xelatex cmd support Chinese'
 	xelatex -output-directory wiki 桌游类小游戏开发框架.tex
 	@echo 'run twice to build toc correctly'

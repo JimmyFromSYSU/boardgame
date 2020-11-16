@@ -1,0 +1,87 @@
+%Please add the following packages if necessary:
+%\usepackage{booktabs, multirow} % for borders and merged ranges
+%\usepackage{soul}% for underlines
+%\usepackage[table]{xcolor} % for cell colors
+%\usepackage{changepage,threeparttable} % for wide tables
+%If the table is too wide, replace \begin{table}[!htp]...\end{table} with
+%\begin{adjustwidth}{-2.5 cm}{-2.5 cm}\centering\begin{threeparttable}[!htb]...\end{threeparttable}\end{adjustwidth}
+%\begin{table}[!htp]\centering
+%\begin{adjustwidth}{1.5 cm}{-0.5 cm}\centering\begin{threeparttable}[!htb]
+%\begin{tabular}{lrrr}\toprule
+%\begin{tabular}{p{0.1\textwidth}p{0.2\textwidth}p{0.65\textwidth}} \toprule
+\begin{longtable}{p{0.2\textwidth} | p{0.25\textwidth} p{0.55\textwidth}} \toprule
+\textbf{Table Name} &\textbf{Column Name} &\textbf{Desc/Type} \\\midrule
+\multirow{6}{*}{DiceHistory} &dice1 &PostiveInt \\ \cline{2-3}
+&dice2 &PostiveInt \\ \cline{2-3}
+&player &Player （哪位玩家掷的骰子） \\ \cline{2-3}
+&turn\_id &Int（第几轮掷的骰子） \\ \cline{2-3}
+&(action\_id) &Int (代表这个操作是该场游戏的第几个action，用来重播游戏过程，用于Debug) \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\hline
+\multirow{10}{*}{RobberHistory} &x &Int (Robber所在位置的x坐标) \\ \cline{2-3}
+&y &Int (Robber所在位置的y坐标) \\ \cline{2-3}
+&player &Player \\ \cline{2-3}
+&is\_knight &Bool（True代表是由Knight技能卡牌触发的Robber，False代表通过掷骰子到数字7触发的Robber） \\ \cline{2-3}
+&is\_latest &Bool（是否最后一个Robber操作，可用于查询当前Robber位置，每个游戏只有一个true value） \\ \cline{2-3}
+&victim &Player（受害者玩家） \\ \cline{2-3}
+&(cardset\_movement) &CardsetMovement（抽牌转移情况） \\ \cline{2-3}
+&turn\_id &Int（第几轮发生的Robber事件） \\ \cline{2-3}
+&(action\_id) &Int (代表这个操作是该场游戏的第几个action，用来重播游戏过程，用于Debug) \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\hline
+\multirow{10}{*}{Cardset} &lumber &Int (default=0) \\ \cline{2-3}
+&brick &Int (default=0) \\ \cline{2-3}
+&wool &Int (default=0) \\ \cline{2-3}
+&grain &Int (default=0) \\ \cline{2-3}
+&ore &Int (default=0) \\ \cline{2-3}
+&dev\_knight &Int (default=0) \\ \cline{2-3}
+&dev\_one\_victory\_point &Int (default=0) \\ \cline{2-3}
+&dev\_road\_building &Int (default=0) \\ \cline{2-3}
+&dev\_monopoly &Int (default=0) \\ \cline{2-3}
+&dev\_year\_of\_plenty &Int (default=0) \\ \cline{2-3}
+\hline
+\multirow{6}{*}{Player} &card\_set &CardSet \\ \cline{2-3}
+&order &Int (取值范围是0~玩家数，代表该玩家是第几个开始行动的玩家。） \\ \cline{2-3}
+&color &Chars (玩家的颜色) \\ \cline{2-3}
+&knight number &（可以根据RobberHistory进行计算） \\ \cline{2-3}
+&（user） &Int (用户id，外层的Portal系统负责用户的注册，有用户名，头像等信息。头像信息也可以放到每个Game里，也就是每个游戏可以随时设置不同头像) \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\hline
+\multirow{6}{*}{Construction} &type &Chars（可选House, Town, Road） \\ \cline{2-3}
+&owner &Player（物件所属玩家） \\ \cline{2-3}
+&x &Int （所在位置x坐标） \\ \cline{2-3}
+&y &Int （所在位置y坐标） \\ \cline{2-3}
+&z &Int （所在位置z坐标） \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\hline
+\multirow{5}{*}{Tile} &type &Chars（可选五种基本资源，Sea，Desert） \\ \cline{2-3}
+&number &Int (每个地块上的数字，2～12) \\ \cline{2-3}
+&x &Int （所在位置x坐标） \\ \cline{2-3}
+&y &Int （所在位置y坐标） \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\multirow{4}{*}{HarborSea} &type &Chars（可选五种基本资源，Any3） \\ \cline{2-3}
+&x &Int （所在海洋位置x坐标） \\ \cline{2-3}
+&y &Int （所在海洋位置y坐标） \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\multirow{5}{*}{HarborLand} &x &Int （所在位置x坐标） \\ \cline{2-3}
+&y &Int （所在位置x坐标） \\ \cline{2-3}
+&z &Int （所在位置x坐标） \\ \cline{2-3}
+&sea &HarborSea \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\hline
+\multirow{2}{*}{Bank} &cardset &Cardset \\ \cline{2-3}
+&game &Game \\ \cline{2-3}
+\hline
+\multirow{6}{*}{Game} &map\_name &Chars（游戏用的地图模版名） \\ \cline{2-3}
+&turn\_id &Int (当前是该场游戏的第几个回合，base=0，每个回合可能有多个action，前2N个回合为Settle阶段，N为玩家数) \\ \cline{2-3}
+&status &Chars（游戏当前的阶段，包括 settle: 放房子阶段。 main：主游戏阶段。 end：游戏结束显示结果阶段。 ） \\ \cline{2-3}
+&number\_of\_player &Int (总玩家数量，也可以从Player表计算) \\ \cline{2-3}
+&(action\_id) &Int (当前是该场游戏的第几个action) \\ \cline{2-3}
+&curr\_player &Player（当前玩家） \\ \cline{2-3}
+\bottomrule
+%\end{tabular}
+\caption{数据库设计}\label{tab: }
+\scriptsize
+\end{longtable}
+%\end{table}
+%\end{threeparttable}\end{adjustwidth}

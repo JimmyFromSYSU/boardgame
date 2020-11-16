@@ -1,11 +1,50 @@
-{{wiki/images/image0.tex}}[image]
 
 
 ## 概述
 
-本项目用于实现各类桌游小游戏的游戏流程，AI玩家，对弈平台等。目前正在开发中国象棋的基本游戏流程和AI算法。
+本项目用于实现各类桌游小游戏的游戏流程，AI玩家，对弈平台等。目前正在开发Catan岛和中国象棋。
 
 ### 安装与设置
+
+#### Django
+安装[Django](https://www.djangoproject.com/)
+
+
+#### Vue
+安装Vue.js
+
+* [Vue.js tutorial 1](https://www.youtube.com/watch?v=bI5jpueiCWw&t=756s)
+* [Vue.js turorial 2](https://www.youtube.com/watch?v=xq532yn8gMA&t=2608s)
+
+#### Bootstrap
+
+安装bootstrap
+
+#### Crafty
+js游戏引擎: [Crafty](https://github.com/craftyjs/Crafty)
+
+#### Websocket
+
+[Websocket tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
+
+```
+ # install channels
+python3 -m pip install channels
+ # install redis
+brew install redis
+ # start redis
+brew services start redis
+ # test redis
+redis-cli ping
+redis-server
+ # channels redis connection
+python3 -m pip install channels_redis
+```
+
+#### Python Lib
+
+安装termcolor：
+
 ```
 python3 -m pip install termcolor
 ```
@@ -52,12 +91,28 @@ Judge还可以用于控制游戏状态和流程，比如实现回退，保存局
 Game控制整个游戏的流程，每个游戏由准备阶段开始，然后经过若干轮，每轮以其中一位Player为主，并由Judge执行操作。最后利用Judge判断游戏结束和得出胜利玩家列表。
 
 ## 卡坦岛设计
+![](images/README/catan.png)
 
 ### 游戏状态转换
 
  {{images/README/catan_web_player_state_machine.dot}}[dot:卡坦岛玩家状态转换]
 
 ### 坐标系设计
+![](images/README/catan_location.png)
+
+
+### 数据库设计
+
+具体请查看google doc：[Catan Design](https://docs.google.com/document/d/1gYzo6ib2sot4ynA650sstkFq2iVueK_y3jLf3UaaeWU/edit?usp=sharing)
+
+ {{tables/README/db_design.tex}}[text]
+
+## 中国象棋
+
+{{wiki/images/image0.tex}}[image]
+
+
+## 德州扑克
 
 ## AI设计
 
@@ -102,12 +157,6 @@ Evaluator是对当前Board局面的一个评估函数，返回一个[0, 1]的值
 
 ### Catan
 * 第一阶段：所有前后台连接，实现基本的游戏状态。
-    * 前台：js/html/css + vue.js + js game engine: [Crafty](https://github.com/craftyjs/Crafty)
-    * [More js game engine](https://github.com/collections/javascript-game-engines)
-    * [Vue.js tutorial 1](https://www.youtube.com/watch?v=bI5jpueiCWw&t=756s)
-    * [Vue.js turorial 2](https://www.youtube.com/watch?v=xq532yn8gMA&t=2608s)
-    * 后台：[django](https://www.djangoproject.com/)
-    * Websocket: [tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
     * 图片资源
     * 游戏流程
 * 第二阶段：测试优化
