@@ -89,6 +89,8 @@ DATABASES = {
     },
 }
 
+DATABASE_ROUTERS = ['src.portal.portal.router.cantan_router.CantanRouter']
+
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
