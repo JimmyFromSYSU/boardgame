@@ -6,7 +6,7 @@ from .models import Player
 from constants import BANK_RESOURCE_NUM
 
 
-class CantanBaseController:
+class CatanBaseController:
     def initial_game(map_name, player_colors):
         player_num = len(player_colors)
         current_player = random.randint(0, player_num-1)
