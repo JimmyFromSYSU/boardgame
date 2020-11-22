@@ -3,11 +3,30 @@ from .models import Game
 from .models import Bank
 from .models import CardSet
 from .models import Player
+from .models import Construction
+from .models import RobberHistory
+from .models import Tile
 from constants import BANK_RESOURCE_NUM
+from map_template import CATAN_MAPS
 
 
 class CatanBaseController:
-    def initial_game(map_name, player_colors):
+    def __init__(self, catan_db):
+        self.db = catan_db
+
+    def __get_tile_type(self, type_name):
+        resource_dict = {
+            'lumber': Tile.LUMBER,
+            'brick': Tile.BRICK,
+            'wool': Tile.WOOL,
+            'grain': Tile.GRAIN,
+            'ore': Tile.ORE,
+            'desert': Tile.DESERT,
+            'sea': Tile.SEA,
+        }
+        return resource_dict.get(type_name, "Invalid resource type.")
+
+    def initial_game(self, map_name, player_colors):
         player_num = len(player_colors)
         current_player = random.randint(0, player_num-1)
         curr_game = Game(map_name=map_name, current_player=current_player, player_num=player_num)
@@ -35,4 +54,34 @@ class CatanBaseController:
             order += 1
 
         # todo: read map from a map dict and intialize tiles, harbors and robbers.
+        map = CATAN_MAPS[map_name]
+        robber_dict = map['robber']
+        robber_history = RobberHistory(turn_id=0, game=curr_game)
+        for tile in map['tiles']:
+            type_name = tile['name']
+            tile = Tile(
+                type=__get_tile_type(type_name),
+                number=tile['number'],
+                x=tile['x'],
+                y=tile['y'],
+                game=curr_game)
+
         return {'game_id':curr_game.id, 'player_orders':player_orders}
+
+    def place_construction(self, player_id, cx, cy, cz, ctype):
+        player = self.db.get_player(player_id)
+        construction = self.db.get_construction(player.game.id, cx, cy, cz)
+        construction.owner = player
+        construction.type = ctype
+
+    def get_curr_player(self, game):
+        pass
+
+    def end_turn(self, game):
+        pass
+
+
+
+
+
+
