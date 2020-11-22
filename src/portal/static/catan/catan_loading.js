@@ -5,8 +5,7 @@ var catan_add_loading_scene = function(game, left, top, width, info_height) {
         const loading_text_h = info_height;
         const loading_bar_h = info_height;
         const loading_color = "#006600"
-        console.log("Crafty.support.audio: " + Crafty.support.audio);
-        console.log(Crafty.audio);
+        console.log("LOADING: Crafty.support.audio = " + Crafty.support.audio);
         var loading_text = Crafty.e("2D, DOM, Text")
             .attr({
                 x: left,
@@ -38,7 +37,7 @@ var catan_add_loading_scene = function(game, left, top, width, info_height) {
             Crafty.scene("main");
             // 部分浏览器无法加载Audio，所以单独列出加载
             Crafty.load(audio_asserts, function(){
-                console.log("loaded audios");
+                console.log("LOADING: audios loaded");
             });
         }
         var progress = function(e) {

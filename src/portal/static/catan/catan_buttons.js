@@ -24,7 +24,6 @@ var catan_load_buttons = function(game) {
 
         trade_mark: {},
     };
-    const click_volume = 0.5;
     const click_button = function(e) {
         e.x = e.anchor_x + 5;
         e.y = e.anchor_y + 5;
@@ -50,7 +49,7 @@ var catan_load_buttons = function(game) {
         }).bind('MouseUp', function(MouseEvent){
             reset_button(this);
             if (bind_e) {reset_button(bind_e)}
-            Crafty.audio.play(sound, 1, click_volume);
+            Crafty.audio.play(sound, 1, game.click_volume);
             if (callback) {
                 callback()
             }
@@ -137,7 +136,7 @@ var catan_load_buttons = function(game) {
                 }
                 game.remove_buy_card(card.name);
                 game.set_buy_cards_panel();
-                Crafty.audio.play("click_off", 1, click_volume);
+                Crafty.audio.play("click_off", 1, game.click_volume);
             });
         })
     }
@@ -176,7 +175,7 @@ var catan_load_buttons = function(game) {
                 }
                 game.remove_pay_card(card.name);
                 game.set_pay_cards_panel();
-                Crafty.audio.play("click_off", 1, click_volume);
+                Crafty.audio.play("click_off", 1, game.click_volume);
             });
             game.control.trade_pay_cards.push(trade_card);
         })
@@ -245,7 +244,7 @@ var catan_load_buttons = function(game) {
         game.set_player_panel_visible(true);
         game.set_select_card_panel_visible(false);
         game.set_wait_trade_button();
-        Crafty.audio.play("ding");
+        Crafty.audio.play("ding", 1, game.click_volume);
     }
     game.enable_trade_mode = function() {
         game.status.trading_mode = true;
@@ -337,74 +336,6 @@ var catan_load_buttons = function(game) {
             name: 'plus',
             w: game.sizes.card_w,
             h: game.sizes.card_h,
-        });
-    }
-
-    /***********************************\
-     * 设置Dice
-    \***********************************/
-    game.roll_dice = function(e, number) {
-        if (e.isPlaying()) {
-            return null;
-        }
-        if (! number) {
-            number = Math.floor(Math.random() * 6);
-        }
-        var animation = [0, 1, 2, 3, 4, 5];
-        animation = animation.concat(animation);
-        animation.sort(() => Math.random() - 0.5);
-        animation.push(number);
-
-        var animation_list = animation.map(v => [v, 0]);
-        var reel = e.getReel('roll_dice');
-        if (reel) {
-            reel.frames = animation_list;
-        } else {
-            e.reel('roll_dice', 1500, animation_list);
-        }
-        e.animate('roll_dice', 1);
-        Crafty.audio.play("roll_dice");
-        return number + 1;
-    }
-
-    game.load_dices = function() {
-        const dice_left = game.sizes.left_panel_w / 3;
-        // const dice_top = map_h + text_height;
-        const dice_top = game.sizes.map_h + game.sizes.panel_h * 0.05;
-        // const dice_w = game.sizes.left_panel_w / 3;
-        const dice_h = game.sizes.panel_h * 0.9; // height - text_height;
-        const dice_w = dice_h;
-
-        // Dice button
-        dice1 = Crafty.e("2D, Canvas, Mouse, SpriteAnimation, dice1").attr({
-            x: dice_left,
-            y: dice_top,
-            z: 0,
-            name: 'dice',
-            w: dice_w,
-            h: dice_h,
-        }).bind('MouseUp', function(MouseEvent){
-            const num1 = game.roll_dice(dice1);
-            const num2 = game.roll_dice(dice2);
-            if (num1 && num2) {
-                console.log(num1 + num2);
-            }
-        });
-
-        // 骰子
-        dice2 = Crafty.e("2D, Canvas, Mouse, SpriteAnimation, dice2").attr({
-            x: dice_left + dice_w,
-            y: dice_top,
-            z: 0,
-            name: 'dice',
-            w: dice_w,
-            h: dice_h,
-        }).bind('MouseUp', function(MouseEvent){
-            const num1 = game.roll_dice(dice1);
-            const num2 = game.roll_dice(dice2);
-            if (num1 && num2) {
-                console.log(num1 + num2);
-            }
         });
     }
 
@@ -590,12 +521,14 @@ var catan_load_buttons = function(game) {
      * load all buttons
     \***********************************/
     game.load_main_button = function() {
-        game.load_yn_button();
-        game.load_plus_button();
-        game.load_dices();
-        game.load_trade_panel();
-        game.set_default_button();
+        game.load_yn_button()
+        game.load_plus_button()
 
+        game = catan_load_dice(game)
+        game.load_dices()
+
+        game.load_trade_panel()
+        game.set_default_button()
     }
     return game;
 }
