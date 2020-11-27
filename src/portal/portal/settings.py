@@ -89,7 +89,7 @@ DATABASES = {
     },
 }
 
-DATABASE_ROUTERS = ['portal.router.cantan_router.CantanRouter']
+DATABASE_ROUTERS = ['portal.router.catan_router.CatanRouter']
 
 
 # Password validation

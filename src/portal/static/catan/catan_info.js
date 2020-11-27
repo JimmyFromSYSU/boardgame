@@ -11,10 +11,10 @@ var catan_load_info = function(game) {
         development_card_max_number: 25,
         bank_cards: [
             {'name': 'lumber', number: 19},
-            {'name': 'brick', number: 18},
-            {'name': 'wool', number: 17},
-            {'name': 'grain', number: 14},
-            {'name': 'ore', number: 13},
+            {'name': 'brick', number: 19},
+            {'name': 'wool', number: 19},
+            {'name': 'grain', number: 19},
+            {'name': 'ore', number: 19},
             {'name': 'dcs_back', number: 25},
         ],
     };
@@ -53,7 +53,7 @@ var catan_load_info = function(game) {
         }
     }
 
-    game.load_info = function() {
+    game.init_info_action = function() {
         const estimated_bank_info_h = game.sizes.map_h / (game.players.length + 1);
         const max_bank_info_h = game.sizes.left_panel_w / 3;
         const bank_info_h = estimated_bank_info_h < max_bank_info_h
@@ -78,6 +78,7 @@ var catan_load_info = function(game) {
 
         const player_frame_padding_lr = game.sizes.left_panel_w / 35;
         const player_frame_padding_td = player_info_h / 60;
+        // Bank Panel
         Crafty.e("2D, Canvas, panel").attr({
             x: 0,
             y: 0,
@@ -85,6 +86,7 @@ var catan_load_info = function(game) {
             w: game.sizes.left_panel_w,
             h: bank_info_h,
         });
+        // Bank icon
         Crafty.e("2D, Canvas, player_bank").attr({
             x: bank_padding_left,
             y: bank_padding_top,
@@ -92,13 +94,7 @@ var catan_load_info = function(game) {
             w: bank_size,
             h: bank_size,
         });
-        Crafty.e("2D, Canvas, player_bank").attr({
-            x: bank_padding_left,
-            y: bank_padding_top,
-            z: 10,
-            w: bank_size,
-            h: bank_size,
-        });
+
 
         const bank_card_length = game.sizes.left_panel_w - bank_padding_left - bank_size - bank_padding_right;
         const bank_card_w = bank_card_length /  game.info.bank_cards.length;
@@ -107,6 +103,7 @@ var catan_load_info = function(game) {
         const bank_card_number_text_height = bank_info_h / 3;
         const bank_card_padding_top = bank_info_h - bank_card_h - bank_card_number_text_height;
 
+        // Bank cards
         game.info.bank_cards.forEach((bank_card, index) => {
             bank_card.e = Crafty.e("2D, Canvas, card_" + bank_card.name).attr({
                 x: bank_padding_left + bank_size + bank_card_w * bank_card_show_pct * index,
@@ -127,6 +124,7 @@ var catan_load_info = function(game) {
             .textFont({family: 'Arial', size: `${bank_card_h / 3}px`, weight: 'bold'});
         });
 
+        // Players panel
         game.players.forEach((player, index) => {
             const panel_padding_ratio = 0.01;
             const d_lr = panel_padding_ratio * game.sizes.left_panel_w;
@@ -175,7 +173,7 @@ var catan_load_info = function(game) {
                     z: 10,
                     w: info_card_w,
                     h: info_card_h,
-                });
+                })
                 Crafty.e("2D, DOM, Text").attr({
                     x: avatar_padding_left + avatar_size + info_card_w * info_card_show_pct * info_index + info_card_length * 0.05 + info_card_w / 4,
                     y: info_card_padding_top + info_card_h,
@@ -185,8 +183,8 @@ var catan_load_info = function(game) {
                 })
                 .text(pad(value, 2))
                 .textColor(player.color)
-                .textFont({family: 'Arial', size: `${info_card_h / 3}px`, weight: 'bold'});
-                info_index = info_index + 1;
+                .textFont({family: 'Arial', size: `${info_card_h / 3}px`, weight: 'bold'})
+                info_index = info_index + 1
             };
         });
     }

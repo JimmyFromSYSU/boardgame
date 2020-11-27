@@ -28,6 +28,12 @@ var CatanWebSocket = {
                 game.move_robber_action({x: data.x, y: data.y});
             } else if (data.action == "COMFIRM_ROLL_DICE") {
                 game.roll_dice_action(data.num1, data.num2)
+            } else if (data.action == "INIT_GAME" && game.is_initialized == false) {
+                game.id = data.game_id
+                game.init_player_action(data.players)
+                game.init_info_action()
+                game.init_player_select_panel_action()
+                game.is_initialized = true
             }
         }
 
