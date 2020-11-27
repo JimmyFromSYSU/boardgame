@@ -12,30 +12,43 @@ var CatanWebSocket = {
         var socket = new ReconnectingWebSocket(endpoint)
 
         socket.onmessage = function(e) {
-            console.log("WebSocket: message", e)
             var data = JSON.parse(e.data)
-            console.log(data)
+            console.log(">>>>>>>>>> WEB_SOCKET: [message]")
+            console.log(e)
+            // console.log(data)
+            console.log("==========")
+
             if (data.action == "COMFIRM_BUILD_HOUSE") {
-                game.build_house_action(data)
+                game.build_house_action({x: data.x, y: data.y, z: data.z})
             } else if (data.action == "COMFIRM_BUILD_TOWN") {
-                game.build_town_action(data)
+                game.build_town_action({x: data.x, y: data.y, z: data.z})
             } else if (data.action == "COMFIRM_BUILD_ROAD") {
-                game.build_road_action(data)
+                game.build_road_action({x: data.x, y: data.y, z: data.z})
+            } else if (data.action == "COMFIRM_MOVE_ROBBER") {
+                game.move_robber_action({x: data.x, y: data.y});
+            } else if (data.action == "COMFIRM_ROLL_DICE") {
+                game.roll_dice_action(data.num1, data.num2)
             }
         }
 
         socket.onopen = function(e) {
-            console.log("WebSocket: open", e)
-            var data = {'message': "who are you?"}
+            console.log(">>>>>>>>>> WEB_SOCKET: [open]")
+            console.log(e)
+            console.log("==========")
+            var data = {'message': "TEST SEND MESSAGE"}
             socket.send(JSON.stringify(data))
         }
 
         socket.onerror = function(e) {
-            console.log("WebSocket: error", e)
+            console.log(">>>>>>>>>> WEB_SOCKET: [error]")
+            console.log(e)
+            console.log("==========")
         }
 
         socket.onclose = function(e) {
-            console.log("WebSocket: close", e)
+            console.log(">>>>>>>>>> WEB_SOCKET: [close]")
+            console.log(e)
+            console.log("==========")
         }
 
         return socket

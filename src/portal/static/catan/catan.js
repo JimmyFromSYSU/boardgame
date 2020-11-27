@@ -7,103 +7,34 @@ var CatanGame = {
     ) {
         var game = {};
         game.board = {};
-        game.player = {
-            name: '小智',
-            id: 1,
-            sprite: 'player_id_1',
-            color: 'blue',
-            info: {
-                resource_card: 10,
-                development_card: 2,
-                score: 3,
-                knight: 0,
-                road: 5,
-            },
-        };
         game.socket = CatanWebSocket.createNew(game)
+        game.click_volume = 0.1
+        /***********************************\
+		 * 加载所有玩家信息
+		\***********************************/
+        game = catan_load_players(game)
 
-        game.players = [
-            game.player,
-            {
-                name: '时涛',
-                id: 2,
-                sprite: 'player_id_2',
-                color: 'red',
-                info: {
-                    resource_card: 5,
-                    development_card: 1,
-                    score: 1,
-                    knight: 1,
-                    road: 5,
-                },
-            },
-            {
-                name: '古今',
-                id: 3,
-                sprite: 'player_id_3',
-                color: 'orange',
-                info: {
-                    resource_card: 10,
-                    development_card: 0,
-                    score: 5,
-                    knight: 0,
-                    road: 3,
-                },
-            },
-            {
-                name: '玩家1', id: 4, sprite: 'avatar3', color: 'yellow',
-                info: {
-                    resource_card: 3,
-                    development_card: 0,
-                    score: 2,
-                    knight: 2,
-                    road: 2,
-                },
-            },
-            // {name: '玩家2', id: 5, sprite: 'avatar2', color: 'green',},
-            // {name: '玩家3', id: 6, sprite: 'avatar1', color: 'purple',},
-            // {name: '小智', id: 7, sprite: 'player_id_1', color: 'purple',},
-            // {name: '时涛', id: 8, sprite: 'player_id_2', color: 'black',},
-        ];
-
-        function pad(num, size) {
-            num = num.toString();
-            while (num.length < size) num = "0" + num;
-            return num;
-        }
-        function get_card_number_color(number, max_number){
-            if (number == max_number) {
-                return '#ff0000';
-            } else if (number <= max_number - game.players.length) {
-                // 平均人手一张。
-                return '#00ff00';
-            } else {
-                return '#ffff00';
-            }
-        }
-        function get_tile_number_color(number){
-            if (number>= 6 && number <= 9) {
-                return '#dd0000';
-            } else {
-                return '#333333';
-            }
-        }
 
         /***********************************\
-		 * 设置所有的tile
-		\***********************************/
+		 * 地图设置
+        \***********************************/
         game.load_map_config = function(map) {
-            game.board.tiles = map.tiles;
-            game.board.row = map.row;
-            game.board.col = map.col;
-            game.board.robber = map.robber;
+            game.board.tiles = map.tiles
+            game.board.row = map.row
+            game.board.col = map.col
+            game.board.robber = map.robber
         }
         // catan_maps.normal
         // catan_maps.fertile_land
         // catan_maps.inland_sea
         game.load_map_config(catan_maps.fertile_land);
 
+
+        /***********************************\
+		 * 设置所有的tile
+		\***********************************/
         // 计算tile的id到tile的mapping
+        game.board.id_to_tile = {};
         game.get_tile_id = function(location) {
             return location.x + location.y * game.board.col;
         };
@@ -111,7 +42,6 @@ var CatanGame = {
             const id = game.get_tile_id(location);
             return game.board.id_to_tile[id];
         };
-        game.board.id_to_tile = {};
         game.board.tiles.forEach(tile => {
             var tid = game.get_tile_id(
                 {'x': tile.x, 'y': tile.y}
@@ -119,317 +49,47 @@ var CatanGame = {
             game.board.id_to_tile[tid] = tile;
         });
 
-        /***********************************\
-		 * 设置所有point上元素
-		\***********************************/
-        game.board.points = [];
-        game.board.id_to_point = {};
-
-        // 计算point的id
-        game.get_point_id = function(location) {
-            const area = game.board.col * game.board.row;
-            const xy_id = location.x + location.y * game.board.col;
-            if (location.z == 1) {
-                return area + xy_id;
+        // 回取每个资源格中数字的颜色
+        function get_tile_number_color(number){
+            if (number>= 6 && number <= 8) {
+                return '#dd0000'
             } else {
-                return xy_id;
+                return '#333333'
             }
-        }
-        game.point_id_to_loc = function(id) {
-            const area = game.board.col * game.board.row;
-            var loc = {}
-            if (id >= area) {
-                loc.z = 1;
-                id = id - area;
-            } else {
-                loc.z = -1;
-            }
-            console.log(`id = ${id}, col=${game.board.col}`);
-            loc.x = Math.floor(id % game.board.col);
-            loc.y = Math.floor(id / game.board.col);
-            return loc;
-        }
-        game.get_point = function (id) {
-            var point = game.board.id_to_point[id];
-            if(point) {
-                return point;
-            } else {
-                point = game.point_id_to_loc(id);
-                point.id = id;
-                console.log(`point = ${point.x}, ${point.y}, ${point.z}`);
-                game.board.points.push(point);
-                game.board.id_to_point[id] = point;
-                return point;
-            }
-        }
-        game.get_point_center = function(point) {
-            const tile_center = game.get_tile_center({x: point.x, y: point.y});
-            const center = {'x': tile_center.x, 'y': tile_center.y + point.z * game.tile_h / 2};
-            return center;
-        }
-
-        /***********************************\
-		 * Build House/Town/Road
-		\***********************************/
-        game.build_house = function(data) {
-            var id = game.get_point_id({
-                x: data.x,
-                y: data.y,
-                z: data.z,
-            })
-            var point = game.get_point(id);
-            point.name = 'house';
-            const center = game.get_point_center(point)
-            const w = game.tile_h / 4;
-            const h = game.tile_h / 4;
-            point.e = Crafty.e(`2D, DOM, obj_house`).attr({
-                x: center.x - w/2,
-                y: center.y - h/2,
-                z: 4,
-                alpha: 1,
-                w: w,
-                h: h,
-            });
-        }
-        game.build_house_action = function(data) {
-            game.build_house(data)
-            Crafty.audio.stop("hammering")
-            Crafty.audio.play("hammering", 1, 0.2)
-        }
-
-        game.build_town = function(data) {
-            var id = game.get_point_id({
-                x: data.x,
-                y: data.y,
-                z: data.z,
-            })
-            var point = game.get_point(id);
-            const center = game.get_point_center(point)
-            const w = game.tile_h / 4;
-            const h = game.tile_h / 4;
-            var house_e = point.e;
-            point.name = 'town';
-            point.e = Crafty.e(`2D, DOM, obj_town`).attr({
-                x: center.x - w * 3 / 4,
-                y: center.y - h * 3 / 4,
-                z: 5,
-                alpha: 1,
-                w: w * 1.4,
-                h: h * 1.4,
-            });
-
-            // TODO: 统一管理哪些touch_e能够被点击
-            if (point.touch_e) {
-                point.touch_e.unbind('Click');
-            }
-
-            house_e.destroy();
-
-        }
-        game.build_town_action = function(data) {
-            game.build_town(data)
-            Crafty.audio.stop("drilling");
-            Crafty.audio.play("drilling", 1, 0.2);
-        }
-        /***********************************\
-		 * 设置所有edge上元素
-		\***********************************/
-        game.board.edges = [];
-        game.board.id_to_edge = {};
-
-        // 计算edge的id
-        game.get_edge_id = function(location) {
-            const area = game.board.col * game.board.row;
-            const xy_id = location.x + location.y * game.board.col;
-            return area * (location.z + 1) + xy_id;
-        }
-        game.get_edge = function (id) {
-            var edge = game.board.id_to_edge[id];
-            if(edge) {
-                return edge;
-            } else {
-                edge = {};
-                game.board.edges.push(edge);
-                game.board.id_to_edge[id] = edge;
-                return edge;
-            }
-        }
-
-        /***********************************\
-		 * 设置Robber
-		\***********************************/
-        game.set_robber = function(location) {
-            const center = game.get_tile_center(location);
-            const tile = game.get_tile(location);
-            const pre_tile = game.board.robber.tile;
-            const w = tile_h * 3 / 4;
-            const h = tile_h * 3 / 4;
-            if (pre_tile == tile) { // robber 已经在tile上
-            } else {
-                console.log("move the robber");
-                if(pre_tile) { // robber 已经在某个tile上
-                    pre_tile.robber_e = null;
-                    if (pre_tile.num_e) {pre_tile.num_e.textColor(get_tile_number_color(pre_tile.num));}
-                    Crafty.audio.stop("punch");
-                    Crafty.audio.play("punch", 1, 0.2);
-                }
-                tile.robber_e = game.board.robber.e;
-                if (tile.num_e) {tile.num_e.textColor("#bbbbbb");}
-                game.board.robber.tile = tile;
-                game.board.robber.e.x = center.x - w / 2;
-                game.board.robber.e.y = center.y - h / 2;
-                game.board.robber.e.w = w;
-                game.board.robber.e.h = h;
-
-            }
-        }
-        game.load_robber = function() {
-            const robber = game.board.robber;
-            const location = {x: robber.x, y: robber.y};
-            game.board.robber.e = Crafty.e("2D, DOM, obj_robber").attr({z: 10, alpha: 1});
-            game.set_robber(location);
         }
 
 
         /***********************************\
-		 * 计算地图中相邻的元素
-		\***********************************/
-        // 计算与某个点相邻的所有tile。
-        game.get_adjacent_tiles_from_point = function (location) {
-            var tiles = [];
-            var push_tile_by_xy = function(x, y) {
-                var loc = {x: x, y: y};
-                var tid = game.get_tile_id(loc);
-                var tile = game.board.id_to_tile[tid];
-                if (tile) {tiles.push(tile);}
-            }
+		 * 加载地图点线面关系的辅助函数
+        \***********************************/
+        game = catan_load_utils_for_map(game)
 
-            var dx = 1;
-            if (location.y % 2 == 0) {dx = -1;}
-            push_tile_by_xy(location.x, location.y);
-            push_tile_by_xy(location.x, location.y + location.z);
-            push_tile_by_xy(location.x + dx, location.y + location.z);
-            return tiles;
-        }
-        // 计算与某条边相邻的所有tile
-        game.get_adjacent_tiles_from_edge = function (location) {
-            var tiles = [];
-            var push_tile_by_xy = function(x, y) {
-                var loc = {x: x, y: y};
-                var tid = game.get_tile_id(loc);
-                var tile = game.board.id_to_tile[tid];
-                if (tile) {tiles.push(tile);}
-            }
-            var dx = -1;
-            if (location.z !== 0 && location.y % 2 == 1) {dx = 0;}
-            push_tile_by_xy(location.x, location.y);
-            push_tile_by_xy(location.x + dx, location.y + location.z);
-            return tiles;
-        }
-        // 计算与某个tile相邻的所有点
-        // 计算与某个tile相邻的所有边
-        // 计算与某个点相邻的所有边
-        // 计算与某个边相邻的所有点
-
-        /***********************************\
-		 * 设置所有的手牌
-		\***********************************/
-        game.board.cards = TEST_FULL_CARD_SET;
-        game.card_compare = function(a, b) {
-            const v = {
-                'lumber': 0,
-                'brick': 1,
-                'wool': 2,
-                'grain': 3,
-                'ore': 4,
-            };
-            // console.log('compare name: ' + a.name);
-            // console.log('compare: ' + (v[a.name] - v[b.name]));
-            return v[a.name] - v[b.name];
-        };
-        game.board.cards.sort(game.card_compare);
-        game.get_selected_cards = function () {
-            var select_cards = [];
-            game.board.cards.forEach(card => {
-                if (card.selected) {
-                    select_cards.push(card);
-                }
-            })
-            return select_cards;
-        };
-
-        game.unselect_card = function (name, count = 1) {
-            var count = 1;
-            game.board.cards.forEach(card => {
-                if (card.selected && card.name == name && count > 0) {
-                    card.selected = false;
-                    card.e.x = card.e.anchor_x;
-                    card.e.y = card.e.anchor_y;
-                    count = count - 1;
-                }
-            })
-        };
-
-        game.get_number_of_cards = function () {
-            return game.board.cards.length;
-        };
-        game.can_buy_development_card = function() {
-            var has_grain = false;
-            var has_wool = false;
-            var has_ore = false;
-            game.board.cards.forEach(card => {
-                if (card.name == 'grain') {
-                    has_grain = true;
-                } else if (card.name == 'wool') {
-                    has_wool = true;
-                } else if (card.name == 'ore') {
-                    has_ore = true;
-                }
-            });
-            return has_grain && has_wool && has_ore;
-        }
-        game.unselect_all_cards = function () {
-            game.board.cards.forEach(card => {
-                if (card.selected) {
-                    card.selected = false;
-                    card.e.x = card.e.anchor_x;
-                    card.e.y = card.e.anchor_y;
-                }
-            });
-        }
+        /************************************************\
+        * load function related to build House/Town/Road
+        \************************************************/
+        catan_load_build(game)
 
         /***********************************\
 		 * 计算所有元素的长宽，自适应屏幕大小
 		\***********************************/
         // TODO: set as config.
-        var col = game.board.col; // first row 8 column, second row 7 column
-        var row = game.board.row;
-
-        var w = window.innerWidth * 0.98;
-
-        var map_w = w * 0.6 * (19 / 24) * (col / row);
-        var map_w_ratio = map_w / w;
-        var left_panel_w = w * (1 - map_w_ratio) / 2;
-        var right_panel_w = w * (1 - map_w_ratio) / 2;
-
+        var col = game.board.col // first row 8 column, second row 7 column
+        var row = game.board.row
+        var w = window.innerWidth * 0.98
+        var map_w = w * 0.6 * (19 / 24) * (col / row)
+        var map_w_ratio = map_w / w
+        var left_panel_w = w * (1 - map_w_ratio) / 2
+        var right_panel_w = w * (1 - map_w_ratio) / 2
         // 显示中tile的大小
-        var tile_w = map_w / col;
-        var tile_h = tile_w * images.tile.height / images.tile.width;
-
-        var map_h = tile_h * 1.0 /4 + tile_h * 3.0 /4 * row;
-        var panel_h = tile_h * 1.2;
-        var h = map_h + panel_h + 10;
-
-        var card_h = panel_h * 0.7;
-        var card_w = card_h * images.card.width / images.card.height;
-
-        var left_card_x = left_panel_w + map_w * 0.05;
-        var plus_card_x = left_panel_w + map_w - card_w - map_w * 0.05;
-
-        game.w = w;
-        game.h = h;
-        game.tile_h = tile_h;
-
+        var tile_w = map_w / col
+        var tile_h = tile_w * images.tile.height / images.tile.width
+        var map_h = tile_h * 1.0 /4 + tile_h * 3.0 /4 * row
+        var panel_h = tile_h * 1.2
+        var h = map_h + panel_h + 10
+        var card_h = panel_h * 0.7
+        var card_w = card_h * images.card.width / images.card.height
+        var left_card_x = left_panel_w + map_w * 0.05
+        var plus_card_x = left_panel_w + map_w - card_w - map_w * 0.05
         game.sizes = {
             map_col: col,
             map_row: row,
@@ -451,7 +111,7 @@ var CatanGame = {
         };
 
         /***********************************\
-		 * 加载地图
+		 * 设置地图
 		\***********************************/
         // 计算某个tile左上角位置
         game.get_tile_tl = function(location) {
@@ -502,7 +162,7 @@ var CatanGame = {
                 const center = game.get_tile_center({x: tile.x, y: tile.y})
                 const w = tile_h / 4 * 1.5;
                 const h = tile_h / 4 * 1.5;
-                var touch_area = Crafty.e(`2D, DOM, number_bg`).attr({
+                tile.num_bg_e = Crafty.e(`2D, DOM, number_bg`).attr({
                     x: center.x - w/2,
                     y: center.y - h/2,
                     z: 0,
@@ -588,7 +248,7 @@ var CatanGame = {
                 if (point.e) {
                     // 已有house，升级成town
                     if (point.name == 'house') {
-                        console.log("add a town");
+                        console.log("PLAYER ACTION: try to add a town");
                         data = JSON.stringify({
                             'action': 'BUILD_TOWN',
                             'x': point.x,
@@ -602,7 +262,7 @@ var CatanGame = {
                     }
                 } else {
                     // 未有house和town
-                    console.log("add a house");
+                    console.log("PLAYER ACTION: try to add a house");
                     data = JSON.stringify({
                         'action': 'BUILD_HOUSE',
                         'x': point.x,
@@ -618,26 +278,20 @@ var CatanGame = {
         game.set_click_edge_obj = function(e, w, h, z) {
             e.bind('Click', function(MouseEvent){
                 var edge = game.get_edge(e.id);
+                edge.touch_e = e
                 // 是否已有entity。
                 if (edge.e) {
                     e.unbind('Click');
                 } else {
                     // 未有road
-                    console.log("add a road");
-                    edge.name = 'house';
-                    const rotation = (z == 0 ? 90 : 30 * z);
-                    edge.e = Crafty.e(`2D, DOM, obj_road`).attr({
-                        x: e.center_x - w/2,
-                        y: e.center_y - h/2,
-                        z: 3,
-                        alpha: 1,
-                        w: w,
-                        h: h,
-                    }).origin('center');
-                    edge.e.rotation = rotation;
-                    e.unbind('Click');
-                    Crafty.audio.stop("hammering");
-                    Crafty.audio.play("hammering", 1, 0.2);
+                    console.log("PLAYER ACTION: add a road");
+                    data = JSON.stringify({
+                        'action': 'BUILD_ROAD',
+                        'x': edge.x,
+                        'y': edge.y,
+                        'z': edge.z,
+                    });
+                    game.socket.send(data);
                 }
             })
         }
@@ -645,10 +299,15 @@ var CatanGame = {
         // 添加tile上的点击函数
         game.set_click_tile_obj = function(e, tile) {
             e.bind('Click', function(MouseEvent){
-                game.set_robber({x: tile.x, y: tile.y});
+                console.log("PLAYER ACTION: move the robber");
+                data = JSON.stringify({
+                    'action': 'MOVE_ROBBER',
+                    'x': tile.x,
+                    'y': tile.y,
+                });
+                game.socket.send(data);
             })
         }
-
         // 加载所有point位置的touch area
         game.load_point_touch_areas = function() {
             var touch_areas_configs = [
@@ -736,6 +395,58 @@ var CatanGame = {
                 }
             });
         };
+
+        /***********************************\
+		 * 设置Robber
+        \***********************************/
+        game.set_robber = function(loc) {
+            const robber = game.board.robber;
+            // set pixel x, y
+            const center = game.get_tile_center(loc)
+            robber.e.x = center.x - robber.e.w / 2
+            robber.e.y = center.y - robber.e.h / 2
+
+            // set tile effect
+            const tile = game.get_tile(loc);
+            robber.tile = tile
+            tile.robber_e = robber.e;
+            if (tile.num_e) {tile.num_e.textColor("#bbbbbb")}
+            if (tile.num_bg_e) {tile.num_bg_e.visible = false}
+        }
+        game.move_robber_action = function(loc) {
+            const tile = game.get_tile(loc);
+            const pre_tile = game.board.robber.tile;
+            if (pre_tile != tile) { // robber 已经在tile上
+                if(pre_tile) { // robber 已经在某个tile上，非初始化放置robber
+                    pre_tile.robber_e = null;
+                    if (pre_tile.num_e) {
+                        pre_tile.num_e.textColor(get_tile_number_color(pre_tile.num));
+                    }
+                    if (pre_tile.num_bg_e) {
+                        pre_tile.num_bg_e.visible = true
+                    }
+                    Crafty.audio.play("punch", 1, game.click_volume)
+                }
+                game.set_robber(loc)
+            }
+        }
+        game.load_robber = function() {
+            const robber = game.board.robber;
+            const loc = {x: robber.x, y: robber.y};
+            const w = game.sizes.tile_h * 3 / 4
+            const h = game.sizes.tile_h * 3 / 4
+            robber.e = Crafty.e("2D, DOM, obj_robber").attr({
+                z: 10,
+                alpha: 1,
+                w: w,
+                h: h,
+            });
+            game.set_robber(loc);
+        }
+
+        /***********************************\
+		 * 加载所有地图区域元素
+        \***********************************/
         game.load_map = function() {
             game.load_tiles();
             game.load_tile_touch_areas();
@@ -745,185 +456,70 @@ var CatanGame = {
         }
 
         /***********************************\
-		 * 加载所有button相关函数
-		\***********************************/
-        game = catan_load_buttons(game);
-
-        /***********************************\
-		 * 加载所有info
-		\***********************************/
-        info_sprites = {
-            'resource_card': 'card_back',
-            'development_card': 'card_dcs_back',
-            'score': 'card_score',
-            'knight': 'card_maximum_knight',
-            'road': 'card_longest_road',
-        };
-        game.info = {
-            resource_card_max_number: 19,
-            development_card_max_number: 25,
-            bank_cards: [
-                {'name': 'lumber', number: 19},
-                {'name': 'brick', number: 18},
-                {'name': 'wool', number: 17},
-                {'name': 'grain', number: 14},
-                {'name': 'ore', number: 13},
-                {'name': 'dcs_back', number: 25},
-            ],
-        };
-        function get_bank_card_number_color(bank_card) {
-            if (bank_card.name == 'dcs_back') {
-                return get_card_number_color(bank_card.number, game.info.development_card_max_number);
-            } else {
-                return get_card_number_color(bank_card.number, game.info.resource_card_max_number);
-            }
-        }
-
-        game.load_info = function() {
-            // const bank_info_h = panel_h * 7 / 10;
-            // const player_info_h = panel_h * 8 / 10;
-            const estimated_bank_info_h = map_h / (game.players.length + 1);
-            const max_bank_info_h = left_panel_w / 3;
-            const bank_info_h = estimated_bank_info_h < max_bank_info_h
-                ? estimated_bank_info_h
-                : max_bank_info_h;
-
-            const estimated_player_info_h = map_h / (game.players.length + 1);
-            const max_player_info_h = left_panel_w / 3;
-            const player_info_h = estimated_player_info_h < max_player_info_h
-                ? estimated_player_info_h
-                : max_player_info_h;
-            // const player_info_h = map_h / (game.players.length + 1);
-
-            const avatar_size = player_info_h / 2;
-            const avatar_padding_top = avatar_size / 2;
-            const avatar_padding_left = avatar_size / 2;
-            const avatar_padding_right = avatar_padding_left;
-
-            const bank_size = bank_info_h / 2;
-            const bank_padding_top = bank_size / 2;
-            const bank_padding_left = bank_size / 2;
-            const bank_padding_right = bank_padding_left;
-
-            const player_frame_padding_lr = left_panel_w / 35;
-            const player_frame_padding_td = player_info_h / 60;
-            Crafty.e("2D, Canvas, panel").attr({
-                x: 0,
-                y: 0,
-                z: 1,
-                w: left_panel_w,
-                h: bank_info_h,
-            });
-            Crafty.e("2D, Canvas, player_bank").attr({
-                x: bank_padding_left,
-                y: bank_padding_top,
-                z: 10,
-                w: bank_size,
-                h: bank_size,
-            });
-            Crafty.e("2D, Canvas, player_bank").attr({
-                x: bank_padding_left,
-                y: bank_padding_top,
-                z: 10,
-                w: bank_size,
-                h: bank_size,
-            });
-
-            const bank_card_length = left_panel_w - bank_padding_left - bank_size - bank_padding_right;
-            const bank_card_w = bank_card_length /  game.info.bank_cards.length;
-            const bank_card_h = game.sizes.card_h / game.sizes.card_w * bank_card_w;
-            const bank_card_show_pct =  1;
-            const bank_card_number_text_height = bank_info_h / 3;
-            const bank_card_padding_top = bank_info_h - bank_card_h - bank_card_number_text_height;
-
-            game.info.bank_cards.forEach((bank_card, index) => {
-                bank_card.e = Crafty.e("2D, Canvas, card_" + bank_card.name).attr({
-                    x: bank_padding_left + bank_size + bank_card_w * bank_card_show_pct * index,
-                    y: bank_card_padding_top,
-                    z: 10,
-                    w: bank_card_w,
-                    h: bank_card_h,
-                });
-                Crafty.e("2D, DOM, Text").attr({
-                    x: bank_padding_left + bank_size + bank_card_w * bank_card_show_pct * index + bank_card_w / 4,
-                    y: bank_card_padding_top + bank_card_h,
-                    z: 11,
-                    w: bank_card_w,
-                    h: bank_card_h
-                })
-                .text(pad(bank_card.number, 2))
-                .textColor(get_bank_card_number_color(bank_card))
-                .textFont({family: 'Arial', size: `${bank_card_h / 3}px`, weight: 'bold'});
-            });
-
-            game.players.forEach((player, index) => {
-                const panel_padding_ratio = 0.01;
-                const d_lr = panel_padding_ratio * left_panel_w;
-                const d_td = panel_padding_ratio * player_info_h;
-                Crafty.e("2D, Canvas, panel").attr({
-                    x: d_lr,
-                    y: bank_info_h + index * player_info_h + d_td,
-                    z: 1,
-                    w: left_panel_w - 2 * d_lr,
-                    h: player_info_h - 2 * d_td,
-                });
-
-                Crafty.e("2D, Canvas, Color").attr({
-                    x: player_frame_padding_lr,
-                    y: bank_info_h + index * player_info_h + player_frame_padding_td,
-                    z: 0,
-                    w: left_panel_w - player_frame_padding_lr * 2,
-                    h: player_info_h - player_frame_padding_td * 2,
-                }).color(player.color);
-
-                Crafty.e("2D, Canvas, Mouse," + player.sprite).attr({
-                    x: avatar_padding_left,
-                    y: bank_info_h + index * player_info_h + avatar_padding_top,
-                    name: player.name,
-                    z: 10,
-                    w: avatar_size,
-                    h: avatar_size,
-                });
-
-                info_index = 0;
-                const info_card_number_text_height = player_info_h / 3;
-                const info_card_padding_top = (
-                    bank_info_h + player_info_h * (1 + index)
-                    - bank_card_h - info_card_number_text_height
-                );
-
-                const info_card_length = left_panel_w - avatar_padding_left - avatar_size - avatar_padding_right;
-                const info_card_w = info_card_length * 0.9 /  Object.entries(game.player.info).length;
-                const info_card_h = game.sizes.card_h / game.sizes.card_w * info_card_w;
-                const info_card_show_pct = 1;
-
-                for (const [key, value] of Object.entries(player.info)) {
-                    Crafty.e("2D, Canvas, " + info_sprites[key]).attr({
-                        x: avatar_padding_left + avatar_size + info_card_w * info_card_show_pct * info_index + info_card_length * 0.05,
-                        y: info_card_padding_top,
-                        z: 10,
-                        w: info_card_w,
-                        h: info_card_h,
-                    });
-                    Crafty.e("2D, DOM, Text").attr({
-                        x: avatar_padding_left + avatar_size + info_card_w * info_card_show_pct * info_index + info_card_length * 0.05 + info_card_w / 4,
-                        y: info_card_padding_top + info_card_h,
-                        z: 11,
-                        w: info_card_w,
-                        h: info_card_h
-                    })
-                    .text(pad(value, 2))
-                    .textColor(player.color)
-                    .textFont({family: 'Arial', size: `${info_card_h / 3}px`, weight: 'bold'});
-                    info_index = info_index + 1;
-                };
-            });
-        }
-
-
-        /***********************************\
 		 * 加载所有的牌
-		\***********************************/
+        \***********************************/
+        game.board.cards = TEST_FULL_CARD_SET;
+        game.card_compare = function(a, b) {
+            const v = {
+                'lumber': 0,
+                'brick': 1,
+                'wool': 2,
+                'grain': 3,
+                'ore': 4,
+            };
+            return v[a.name] - v[b.name];
+        };
+        game.board.cards.sort(game.card_compare);
+        game.get_selected_cards = function () {
+            var select_cards = [];
+            game.board.cards.forEach(card => {
+                if (card.selected) {
+                    select_cards.push(card);
+                }
+            })
+            return select_cards;
+        };
+
+        game.unselect_card = function (name, count = 1) {
+            var count = 1;
+            game.board.cards.forEach(card => {
+                if (card.selected && card.name == name && count > 0) {
+                    card.selected = false;
+                    card.e.x = card.e.anchor_x;
+                    card.e.y = card.e.anchor_y;
+                    count = count - 1;
+                }
+            })
+        };
+
+        game.get_number_of_cards = function () {
+            return game.board.cards.length;
+        };
+        game.can_buy_development_card = function() {
+            var has_grain = false;
+            var has_wool = false;
+            var has_ore = false;
+            game.board.cards.forEach(card => {
+                if (card.name == 'grain') {
+                    has_grain = true;
+                } else if (card.name == 'wool') {
+                    has_wool = true;
+                } else if (card.name == 'ore') {
+                    has_ore = true;
+                }
+            });
+            return has_grain && has_wool && has_ore;
+        }
+        game.unselect_all_cards = function () {
+            game.board.cards.forEach(card => {
+                if (card.selected) {
+                    card.selected = false;
+                    card.e.x = card.e.anchor_x;
+                    card.e.y = card.e.anchor_y;
+                }
+            });
+        }
+
         game.get_show_pct = function(max_len, num_cards, card_w, max_pct = 0.8) {
             // show_pct * card_w * num_cards + (1-show_pct) * card_w = max_len
             var show_pct = (max_len - card_w) / ((num_cards - 1) * card_w);
@@ -971,20 +567,19 @@ var CatanGame = {
                         return;
                     }
                     if(card.selected == false) {
-                        console.log('select ' + card.name);
+                        console.log('PLAYER ACTION: select ' + card.name);
                         this.y -= 0.15 * card_h;
                         card.selected = true;
-                        Crafty.audio.play("click_on");
+                        Crafty.audio.play("click_on", 1, game.click_volume);
                     } else {
-                        console.log('unselect ' + card.name);
+                        console.log('PLAYER ACTION: unselect ' + card.name);
                         this.y = y;
                         card.selected = false;
-                        Crafty.audio.play("click_off", 1, 0.5);
+                        Crafty.audio.play("click_off", 1, game.click_volume);
                     }
 
                     const selected_cards = game.get_selected_cards();
                     if (selected_cards.length > 0) {
-                        console.log("select at lease 1 card");
                         game.enable_trade_mode();
                         game.set_start_trade_button();
                     } else {
@@ -993,6 +588,16 @@ var CatanGame = {
                 });
             });
         }
+
+        /***********************************\
+		 * 加载所有button相关函数
+		\***********************************/
+        game = catan_load_buttons(game)
+
+        /***********************************\
+		 * 加载所有info相关内容
+        \***********************************/
+        game = catan_load_info(game)
 
         /***********************************\
 		 * 开始运行游戏

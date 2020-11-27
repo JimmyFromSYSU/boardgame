@@ -7,6 +7,9 @@ load:
 
 server:
 	# source ~/ENV/bin/activate
+	# brew services start redis
+	# lsof -i:5001
+	# kill -9 PID
 	python src/portal/manage.py runserver 0.0.0.0:5001
 
 readme:
@@ -31,3 +34,8 @@ image:
 
 git:
 	git push https://github.com/JimmyFromSYSU/boardgame.git master
+
+
+# python3 manage.py createsuperuser
+# user: zhiliu
+# pw: 12345678-Liu
