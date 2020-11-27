@@ -1,0 +1,42 @@
+{%extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div id="catan_room">
+
+
+    <div class="card">
+        <div class="card-header">
+            <div id="logout_button">
+                <a href="{% url 'logout' %}" class="btn btn-warning btn-lg active" role="button" aria-pressed="true">log out</a>
+            </div>
+            <h2>Catan Room ({{request.user.first_name}})</h2>
+        </div>
+        <div class="card-body">
+            <div id="user_list">all users  </div>
+            <hr/>
+            <div id="config_setup"> 223</div>
+        </div>
+      </div>
+
+
+
+    <div>
+
+    <!-- <p> {{request.user.username}} </p> -->
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
+{% endblock %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'catan/catan_room.css' %}">
+{% endblock %}

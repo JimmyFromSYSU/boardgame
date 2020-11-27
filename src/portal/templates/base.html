@@ -21,7 +21,7 @@
     {% block css %}
     {% endblock %}
 
-    <title>{{title}}</title>
+    <title>{% block title %}{{title}}{% endblock %}</title>
 
 </head>
 <body>

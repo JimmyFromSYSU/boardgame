@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div id="login_box">
+
+{% if form.errors %}
+<p class="error_text">Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+
+
+<div class="form-group">
+    <label for="id_username">Username</label>
+    <input
+        type="text" class="form-control"
+        id="id_username" aria-describedby="emailHelp" placeholder="Enter username"
+        name="username"
+        autocapitalize="none"
+        autocomplete="username"
+        required=""
+    >
+  </div>
+  <div class="form-group">
+    <label for="id_password">Password</label>
+    <input type="password" name="password"
+        class="form-control" id="exampleInputPassword1" placeholder="Enter password"
+        required="" id="id_password"
+        autocomplete="current-password"
+    >
+  </div>
+
+  <button type="submit" value="login" class="btn btn-primary">Submit</button>
+  <input type="hidden" name="next" value="{{ next }}">
+
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+
+
+</div>
+
+{% endblock %}
+
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'portal/login.css' %}">
+{% endblock %}

@@ -3,15 +3,26 @@ import json
 from django.contrib.auth import get_user_model
 from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
-from data_layer import init_game
+from .data_layer.api import init_game, get_last_game_id
+from .data_layer.player_data import PLAYERS_DATA
+
 
 class CatanConsumer(AsyncConsumer):
-    counter = 0
+    connection_counter = 0
+    game_id = None
+    user_to_player = {}
+    player_orders = {}
 
-    def print_counter(self):
-        print(">>>>>>>>>>>>>>>>>>>>>>> INFO: counter")
-        print(f"counter = {CatanConsumer.counter}")
+    def print_connection_counter(self):
+        print(">>>>>>>>>>>>>>>>>>>>>>> INFO: connection_counter")
+        print(f"connection_counter = {CatanConsumer.connection_counter}")
         print("<<<<<<<<<<<<<<<<<<<<<<<")
+
+    def print_game_id(self, game_id):
+        print(">>>>>>>>>>>>>>>>>>>>>>> INFO: game_id")
+        print(f"game_id = {game_id}")
+        print("<<<<<<<<<<<<<<<<<<<<<<<")
+
 
     def print_event(self, name, event):
         print(f">>>>>>>>>>>>>>>>>>>>>>> EVENT: {name}")
@@ -26,28 +37,57 @@ class CatanConsumer(AsyncConsumer):
                 "type": "websocket.accept",
             }
         )
-        response = {
-            "action": "CONFIRM_CONNECTION",
-        }
-        await self.send(
-            {
-                "type": "websocket.send",
-                "text": json.dumps(response),
-            }
-        )
 
-        if CatanConsumer.counter == 0:
+        if CatanConsumer.connection_counter == 0:
             map_name = "normal"
-            init_game()
+            (game_id, user_to_player, player_orders) = init_game(map_name, {})
+            CatanConsumer.game_id = game_id
+            CatanConsumer.user_to_player = user_to_player
+            CatanConsumer.player_orders = player_orders
+        else:
+            # game_id = get_last_game_id()
+            game_id = CatanConsumer.game_id
+            user_to_player = CatanConsumer.user_to_player
+            player_orders = CatanConsumer.player_orders
 
-        CatanConsumer.counter = CatanConsumer.counter + 1
+        CatanConsumer.connection_counter = CatanConsumer.connection_counter + 1
 
-        self.print_counter()
+        self.print_connection_counter()
 
-        self.game_room = f"game_room_1"
+        self.print_game_id(game_id)
+        self.game_room = f"game_room_{game_id}"
         await self.channel_layer.group_add(
             self.game_room,
             self.channel_name, # channel_name appear only when channel layer is setup
+        )
+
+        # # send to single user
+        # response = {
+        #     'action': 'INIT_INFO',
+        #     'game_id': game_id,
+        #     # 'number_of_players': len()
+        #     # 'players': PLAYERS_DATA,
+        # }
+        # await self.send(
+        #     {
+        #         "type": "websocket.send",
+        #         "text": json.dumps(response),
+        #     }
+        # )
+
+        # send to all users
+        response = {
+            'action': 'INIT_GAME',
+            'game_id': game_id,
+            'players': PLAYERS_DATA,
+        }
+
+        await self.channel_layer.group_send(
+            self.game_room,
+            {
+                "type": "chat_message",  # handler name
+                "text": json.dumps(response) # handler event data
+            }
         )
 
     async def websocket_receive(self, event):
@@ -117,6 +157,6 @@ class CatanConsumer(AsyncConsumer):
 
 
     async def websocket_disconnect(self, event):
-        CatanConsumer.counter = CatanConsumer.counter - 1
+        CatanConsumer.connection_counter = CatanConsumer.connection_counter - 1
         self.print_event("disconnected", event)
-        self.print_counter()
+        self.print_connection_counter()
