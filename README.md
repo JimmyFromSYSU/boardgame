@@ -28,16 +28,20 @@ js游戏引擎: [Crafty](https://github.com/craftyjs/Crafty)
 [Websocket tutorial](https://www.youtube.com/watch?v=RVH05S1qab8&list=PLcWimtlf9naWeyuY5OwQeaRNxvxTRyTCt&index=1&t=3148s)
 
 ```
- # install channels
+# install channels
 python3 -m pip install channels
- # install redis
+
+# install redis
 brew install redis
- # start redis
+
+# start redis
 brew services start redis
- # test redis
+
+# test redis
 redis-cli ping
 redis-server
- # channels redis connection
+
+# channels redis connection
 python3 -m pip install channels_redis
 ```
 

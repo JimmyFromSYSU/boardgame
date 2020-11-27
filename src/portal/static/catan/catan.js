@@ -7,12 +7,18 @@ var CatanGame = {
     ) {
         var game = {};
         game.board = {};
-        game.socket = CatanWebSocket.createNew(game)
+        game.is_initialized = false;
         game.click_volume = 0.1
         /***********************************\
 		 * 加载所有玩家信息
-		\***********************************/
-        game = catan_load_players(game)
+        \***********************************/
+        // TODO: read from backend
+        // game = catan_load_players(game)
+        game.players = []
+        game.init_player_action = function(players) {
+            game.players = players
+            game.player = players[0]
+        }
 
 
         /***********************************\
@@ -604,10 +610,11 @@ var CatanGame = {
 		\***********************************/
         // 加载主场景
         game.load_main_scene = function() {
-            game.load_map();
-            game.load_cards();
-            game.load_main_button();
-            game.load_info();
+            game.load_map()
+            game.load_cards()
+            game.load_main_button()
+            // game.load_info()
+            game.socket = CatanWebSocket.createNew(game)
         }
 
         game.run = function() {

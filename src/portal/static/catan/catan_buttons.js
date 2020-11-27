@@ -229,14 +229,22 @@ var catan_load_buttons = function(game) {
         game.control.trade_mark.e.visible = visible;
     }
     game.set_player_panel_visible = function(visible) {
-        game.control.select_player_panel.e.visible = visible;
-        game.control.select_player_text.e.visible = visible;
-        game.players.forEach((player, index) => {
-            if (index != 0) {
-                player.e.visible = visible;
-                player.frame_e.visible = visible;
-            }
-        });
+        if (
+            game.control.select_player_panel.e &&
+            game.control.select_player_text.e
+        ) {
+            game.control.select_player_panel.e.visible = visible;
+            game.control.select_player_text.e.visible = visible;
+        }
+
+        if (game.players) {
+            game.players.forEach((player, index) => {
+                if (index != 0 && player.e && player.frame_e) {
+                    player.e.visible = visible;
+                    player.frame_e.visible = visible;
+                }
+            });
+        }
     }
 
     game.send_trade_request = function() {
@@ -376,64 +384,67 @@ var catan_load_buttons = function(game) {
         const button_card_h = game.sizes.trade_card_h * 4 / 5;
 
         // player select panel
-        game.control.select_player_panel.e =Crafty.e("2D, Canvas, panel").attr({
-            x: trade_panel_l,
-            y: game.sizes.select_player_panel_t,
-            z: 0,
-            w: game.sizes.right_panel_w,
-            h: panel_h,
-        });
+        game.init_player_select_panel_action = function() {
+            game.control.select_player_panel.e =Crafty.e("2D, Canvas, panel").attr({
+                x: trade_panel_l,
+                y: game.sizes.select_player_panel_t,
+                z: 0,
+                w: game.sizes.right_panel_w,
+                h: panel_h,
+            });
 
-        game.control.select_player_text.e = Crafty.e("2D, DOM, Text").attr({
-                x: game.sizes.trade_card_l,
-                y: select_player_info_text_t,
-                w: game.sizes.right_panel_w, h: select_player_info_text_height})
-            .text("选择你想交易的玩家")
-            .textColor('#338811')
-            .textFont({ type: 'italic', family: 'Arial', size: `${select_player_info_text_height/2}px`, weight: 'bold'});
+            game.control.select_player_text.e = Crafty.e("2D, DOM, Text").attr({
+                    x: game.sizes.trade_card_l,
+                    y: select_player_info_text_t,
+                    w: game.sizes.right_panel_w, h: select_player_info_text_height})
+                .text("选择你想交易的玩家")
+                .textColor('#338811')
+                .textFont({ type: 'italic', family: 'Arial', size: `${select_player_info_text_height/2}px`, weight: 'bold'});
 
 
-        const avatar_size = button_card_w * 0.8;
-        const avatar_frame_size = button_card_w;
-        const frame_padding = (avatar_frame_size - avatar_size) / 2;
-        const panel_padding = avatar_size * 2 / 3;
-        game.sizes.trade_avatar_l = game.sizes.trade_panel_l + panel_padding;
+            const avatar_size = button_card_w * 0.8;
+            const avatar_frame_size = button_card_w;
+            const frame_padding = (avatar_frame_size - avatar_size) / 2;
+            const panel_padding = avatar_size * 2 / 3;
+            game.sizes.trade_avatar_l = game.sizes.trade_panel_l + panel_padding;
 
-        const player_show_pct = game.get_show_pct(
-            game.sizes.trade_panel_r - game.sizes.trade_panel_l - panel_padding * 2,
-            game.players.length - 1,
-            avatar_frame_size,
-            1.5,
-        );
+            const player_show_pct = game.get_show_pct(
+                game.sizes.trade_panel_r - game.sizes.trade_panel_l - panel_padding * 2,
+                game.players.length - 1,
+                avatar_frame_size,
+                1.5,
+            );
 
-        game.players.forEach((player, index) => {
-            if (index != 0) {
-                index = index - 1;
-                player.e = Crafty.e("2D, Canvas, Mouse," + player.sprite).attr({
-                    x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index + frame_padding,
-                    y: game.sizes.select_player_t + frame_padding,
-                    anchor_x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index + frame_padding,
-                    anchor_y: game.sizes.select_player_t + frame_padding,
-                    name: player.name,
-                    z: 11,
-                    w: avatar_size,
-                    h: avatar_size,
-                })
-                player.frame_e = Crafty.e("2D, Canvas, Color").attr({
-                    x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
-                    y: game.sizes.select_player_t,
-                    anchor_x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
-                    anchor_y: game.sizes.select_player_t,
-                    name: player.name,
-                    z: 10,
-                    w: avatar_frame_size,
-                    h: avatar_frame_size,
-                }).color(player.color);
+            game.players.forEach((player, index) => {
+                if (index != 0) {
+                    index = index - 1;
+                    player.e = Crafty.e("2D, Canvas, Mouse," + player.sprite).attr({
+                        x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index + frame_padding,
+                        y: game.sizes.select_player_t + frame_padding,
+                        anchor_x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index + frame_padding,
+                        anchor_y: game.sizes.select_player_t + frame_padding,
+                        name: player.name,
+                        z: 11,
+                        w: avatar_size,
+                        h: avatar_size,
+                    })
+                    player.frame_e = Crafty.e("2D, Canvas, Color").attr({
+                        x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
+                        y: game.sizes.select_player_t,
+                        anchor_x: game.sizes.trade_avatar_l + button_card_w * player_show_pct * index,
+                        anchor_y: game.sizes.select_player_t,
+                        name: player.name,
+                        z: 10,
+                        w: avatar_frame_size,
+                        h: avatar_frame_size,
+                    }).color(player.color);
 
-                game.set_button_movement(player.e, null, "click_on", player.frame_e);
-            }
-        });
+                    game.set_button_movement(player.e, null, "click_on", player.frame_e);
+                }
+            })
 
+            game.set_player_panel_visible(false)
+        }
 
         // card select panel
         game.control.select_card_panel.e = Crafty.e("2D, Canvas, panel").attr({
