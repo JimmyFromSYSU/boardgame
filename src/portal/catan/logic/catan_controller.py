@@ -1,11 +1,10 @@
 import random
-from .models import Game
-from .models import Bank
-from .models import CardSet
-from .models import Player
-from .models import Construction
-from .models import RobberHistory
-from .models import Tile
+from ..models import Game
+from ..models import Bank
+from ..models import CardSet
+from ..models import Player
+from ..models import RobberHistory
+from ..models import Tile
 from constants import BANK_RESOURCE_NUM
 from map_template import CATAN_MAPS
 
@@ -66,7 +65,7 @@ class CatanBaseController:
                 y=tile['y'],
                 game=curr_game)
 
-        return {'game_id':curr_game.id, 'player_orders':player_orders}
+        return {'game_id': curr_game.id, 'player_orders': player_orders}
 
     def place_construction(self, player_id, cx, cy, cz, ctype):
         player = self.db.get_player(player_id)
@@ -79,6 +78,21 @@ class CatanBaseController:
 
     def end_turn(self, game):
         pass
+
+    def get_game_info(self, game_id):
+        game = self.db.get_game(game_id)
+        turn_id = game.turn_id
+        number_of_player = game.number_of_player
+        status = game.status
+        state = game.state
+        current_player_id = game.current_player
+        return {
+            'turn_id': turn_id,
+            'number_of_player': number_of_player,
+            'status': status,
+            'state': state,
+            'current_player_id': current_player_id
+        }
 
 
 

@@ -143,6 +143,7 @@ class Game(models.Model):
     ]
 
     map_name = models.CharField(max_length=200)
+    state = models.CharField(max_length=200)
     turn_id = models.IntegerField(default=0)
     status = models.CharField(
         max_length=2,
