@@ -19,6 +19,7 @@ class CardSet(models.Model):
 class Player(models.Model):
     card_set = models.OneToOneField(CardSet, on_delete=models.CASCADE)
     order = models.IntegerField(default=0)
+    user_id = models.IntegerField(default=0)
     color = models.CharField(max_length=10)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
 
@@ -150,6 +151,15 @@ class Game(models.Model):
         choices=GAME_STATUS,
         default=SETTLE)
     number_of_player = models.PositiveIntegerField(default=2)
-    current_player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name='current_game')
+    current_player = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str({
+            'map_name': self.map_name,
+            'state': self.state,
+            'status': self.status,
+            'number_of_player': self.number_of_player,
+            'current_player': self.current_player
+        })
 
 

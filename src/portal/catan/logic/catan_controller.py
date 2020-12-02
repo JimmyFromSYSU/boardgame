@@ -5,13 +5,18 @@ from ..models import CardSet
 from ..models import Player
 from ..models import RobberHistory
 from ..models import Tile
-from constants import BANK_RESOURCE_NUM
-from map_template import CATAN_MAPS
+from ..models import DiceHistory
+from .constans import BANK_RESOURCE_NUM
+from .constans import SCORE_TO_WIN
+from .map_template import CATAN_MAPS
+from ..db.catan_database import get_player_by_user_id
+from ..db.catan_database import get_player_by_order
+from ..db.catan_database import get_construction
+from ..db.catan_database import get_game
+from ..db.catan_database import get_bank
 
 
 class CatanBaseController:
-    def __init__(self, catan_db):
-        self.db = catan_db
 
     def __get_tile_type(self, type_name):
         resource_dict = {
@@ -28,7 +33,7 @@ class CatanBaseController:
     def initial_game(self, map_name, player_colors):
         player_num = len(player_colors)
         current_player = random.randint(0, player_num-1)
-        curr_game = Game(map_name=map_name, current_player=current_player, player_num=player_num)
+        curr_game = Game(map_name=map_name, current_player=0, num_of_player=player_num)
         
         bank_card_set = CardSet(
             lumber=BANK_RESOURCE_NUM,  
@@ -48,18 +53,18 @@ class CatanBaseController:
         for user_id in player_colors:
             player_card_set = CardSet()
             order = (order - current_player + player_num) % player_num
-            player = Player(card_set=player_card_set, order=order, color=player_colors[user_id], game=curr_game)
+            player = Player(
+                card_set=player_card_set, order=order, color=player_colors[user_id], game=curr_game, user_id=user_id)
             player_orders[player.id] = order
             order += 1
 
-        # todo: read map from a map dict and intialize tiles, harbors and robbers.
         map = CATAN_MAPS[map_name]
         robber_dict = map['robber']
         robber_history = RobberHistory(turn_id=0, game=curr_game)
         for tile in map['tiles']:
             type_name = tile['name']
             tile = Tile(
-                type=__get_tile_type(type_name),
+                type=self.__get_tile_type(type_name),
                 number=tile['number'],
                 x=tile['x'],
                 y=tile['y'],
@@ -67,20 +72,67 @@ class CatanBaseController:
 
         return {'game_id': curr_game.id, 'player_orders': player_orders}
 
-    def place_construction(self, player_id, cx, cy, cz, ctype):
-        player = self.db.get_player(player_id)
-        construction = self.db.get_construction(player.game.id, cx, cy, cz)
+    def place_construction(self, game_id, user_id, cx, cy, cz, ctype):
+        player = get_player_by_user_id(game_id, user_id)
+        construction = get_construction(player.game.id, cx, cy, cz)
         construction.owner = player
         construction.type = ctype
 
-    def get_curr_player(self, game):
+    def end_turn(self, game_id):
+        game = get_game(game_id)
+        turn_id = game.turn_id
+        player_num = game.number_of_player
+        curr_player = game.current_player
+
+        if self.score(game_id) >= SCORE_TO_WIN:
+            game.status = Game.END
+
+        if player_num <= turn_id < (2 * player_num):
+            game.current_player = (curr_player - 1 + player_num) % player_num
+        else:
+            game.current_player = (curr_player + 1) % player_num
+
+        if player_num - 1 == turn_id:
+            game.current_player = (game.current_player - 1 + player_num) % player_num
+
+        game.turn_id = turn_id + 1
+        if game.turn_id < 2 * player_num:
+            game.status = Game.SETTLE
+        else:
+            game.status = Game.MAIN
+
+    def score(self, game_id):
         pass
 
-    def end_turn(self, game):
-        pass
+    def roll_dice(self, game_id):
+        game = get_game(game_id)
+        player = get_player_by_order(game.id, game.current_player)
+        dice1 = random.randint(1, 6)
+        dice2 = random.randint(1, 6)
+
+        dice_history = DiceHistory(dice1=dice1, dice2=dice2, game=game, player=player, turn_id=game.turn_id)
+        return [dice1, dice2]
+
+    def compute_resource(self, game_id, dice_sum):
+        game = get_game(game_id)
+
+    def disturb_resource(self, game_id, user_id, resource_card_list):
+        bank = get_bank(game_id)
+        player = get_player_by_user_id(user_id, game_id)
+        bank_card_set = bank.card_set
+        player_card_set = player.card_set
+
+        for resource_type in resource_card_list:
+            num = resource_card_list[resource_type]
+            if resource_type == 'lumber':
+                player_card_set.lumber = player_card_set.lumber + num
+                bank_card_set.lumber = bank_card_set.lumber - num
+            elif resource_type == 'brick':
+                player_card_set.brick = player_card_set.brick + num
+                bank_card_set.brick = bank_card_set.brick - num
 
     def get_game_info(self, game_id):
-        game = self.db.get_game(game_id)
+        game = get_game(game_id)
         turn_id = game.turn_id
         number_of_player = game.number_of_player
         status = game.status
