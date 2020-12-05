@@ -74,7 +74,7 @@ class CatanBaseController:
 
     def place_construction(self, game_id, user_id, cx, cy, cz, ctype):
         player = get_player_by_user_id(game_id, user_id)
-        construction = get_construction(player.game.id, cx, cy, cz)
+        construction = get_construction(game_id, cx, cy, cz)
         construction.owner = player
         construction.type = ctype
 
@@ -86,6 +86,7 @@ class CatanBaseController:
 
         if self.score(game_id) >= SCORE_TO_WIN:
             game.status = Game.END
+            return
 
         if player_num <= turn_id < (2 * player_num):
             game.current_player = (curr_player - 1 + player_num) % player_num
