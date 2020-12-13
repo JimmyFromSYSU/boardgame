@@ -1,5 +1,6 @@
 import random
 from typing import Dict, Any, List, Tuple, Optional
+from collections import Counter
 from ..models import Game
 from ..models import Bank
 from ..models import CardSet
@@ -7,16 +8,32 @@ from ..models import Player
 from ..models import RobberHistory
 from ..models import Tile
 from ..models import DiceHistory
+from ..models import Construction
 from .constans import BANK_RESOURCE_NUM
 from .constans import SCORE_TO_WIN
 from .map_template import CATAN_MAPS
 from ..db.catan_database import get_player_by_user_id
 from ..db.catan_database import get_player_by_order
 from ..db.catan_database import get_construction
+from ..db.catan_database import get_tiles_by_number
+from ..db.catan_database import get_houses
+from ..db.catan_database import get_towns
+from ..db.catan_database import count_houses_by_user_id
+from ..db.catan_database import count_towns_by_user_id
 from ..db.catan_database import get_game
 from ..db.catan_database import get_bank
 CardSetDict = Dict[str, int]
-# CardType could be
+# CardType could be [
+#     lumber
+#     brick
+#     wool
+#     grain
+#     ore
+#     dev_knight
+#     dev_one_victory_point
+#     dev_road_building
+#     dev_monopoly
+#     dev_year_of_plenty]
 CardType = str
 UserId = int
 
@@ -35,12 +52,9 @@ class CatanBaseController:
         }
         return resource_dict.get(type_name, "Invalid resource type.")
 
-    # TODO: change to user_colors
-    # TODO: list comprehensive
-    # Note:
     # 初始化开始顺序，保存Player，Bank,以及整个地图（Tiles）到数据库。
-    def initial_game(self, map_name, player_colors: Dict[int, str]) -> Dict[str, Any]:
-        player_num = len(player_colors)
+    def initial_game(self, map_name, user_colors: Dict[int, str]) -> Dict[str, Any]:
+        player_num = len(user_colors)
         current_player = random.randint(0, player_num-1)
         curr_game = Game(map_name=map_name, current_player=0, num_of_player=player_num)
         
@@ -59,7 +73,7 @@ class CatanBaseController:
 
         order = 0
         player_orders = {}
-        for user_id, user_color in player_colors.items():
+        for user_id, user_color in user_colors.items():
             player_card_set = CardSet()
             order = (order - current_player + player_num) % player_num
             player = Player(
@@ -118,7 +132,10 @@ class CatanBaseController:
 
     # 返回指定玩家当前得分
     def score(self, game_id, user_id) -> int:
-        pass
+        house_cnt = count_houses_by_user_id(game_id, user_id)
+        town_count = count_towns_by_user_id(game_id, user_id)
+
+        return house_cnt + town_count * 2
 
     # Note：dice range from [1, 6]
     # 保存并返回玩家丢骰子的数值
@@ -131,15 +148,37 @@ class CatanBaseController:
         dice_history = DiceHistory(dice1=dice1, dice2=dice2, game=game, player=player, turn_id=game.turn_id)
         return dice1, dice2
 
-    # todo list cardset key
     # Note: dice_sum is from 2~12.
+    # The keys of CardSetDict are [LIMBER, BRICK, WOOL, GRAIN, ORE]
     # 根据骰子数值计算玩家所得资源，从银行移动资源到玩家，保存银行和玩家的资源到数据库。
     def compute_resource(self, game_id, dice_sum: int) -> Dict[UserId, CardSetDict]:
-        game = get_game(game_id)
+        tiles = get_tiles_by_number(dice_sum)
+        user_resource_dict: Dict[UserId, List[str]] = {}
+        user_card_set_dict: Dict[UserId, CardSetDict] = {}
 
-    # 将List
+        houses_list = [get_houses(game_id, tile.x, tile.y) for tile in tiles]
+        towns_list = [get_towns(game_id, tile.x, tile.y) for tile in tiles]
+        for tile, houses, towns in zip(tiles, houses_list, towns_list):
+            for house in houses:
+                owner_id = house.owner.user_id
+                resource_list: List[str] = user_resource_dict.get(owner_id, [])
+                resource_list.append(tile.type)
+                user_resource_dict.update({owner_id: resource_list})
+            for town in towns:
+                owner_id = town.owner.user_id
+                resource_list: List[str] = user_resource_dict.get(owner_id, [])
+                resource_list.append(tile.type)
+                resource_list.append(tile.type)
+                user_resource_dict.update({owner_id: resource_list})
+        for user_id, resource_list in user_resource_dict.items():
+            self.distribute_resource_from_bank(game_id, user_id, resource_list)
+            user_card_set_dict.update({user_id: self.__build_cardset_dict(resource_list)})
+
+        return user_card_set_dict
+
+    # 将List变成Dict. e.g. [a, b, a] -> {a: 2, b: 1}
     def __build_cardset_dict(self, cards: List[str]) -> Dict[str, int]:
-        pass
+        return Counter(cards)
 
     # Note：only distribute 5 resource card, not including development cards.
     # 从银行移动资源到玩家，保存银行和玩家的资源到数据库。
@@ -151,13 +190,10 @@ class CatanBaseController:
 
         resource_cards = self.__build_cardset_dict(cards)
         for resource_type, num in resource_cards.items():
-            # move to cardSet model
-            if resource_type == 'lumber':
-                player_card_set.lumber = player_card_set.lumber + num
-                bank_card_set.lumber = bank_card_set.lumber - num
-            elif resource_type == 'brick':
-                player_card_set.brick = player_card_set.brick + num
-                bank_card_set.brick = bank_card_set.brick - num
+            # todo move to cardSet model
+            player_card_set.update_card_set(resource_type, num)
+            bank_card_set.update_card_set(resource_type, -num)
+        return True
 
     # 返回当前游戏信息
     def get_game_info(self, game_id) -> Dict[str, Any]:
