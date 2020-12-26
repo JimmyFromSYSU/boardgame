@@ -15,16 +15,39 @@ class CardSet(models.Model):
     dev_monopoly = models.IntegerField(default=0)
     dev_year_of_plenty = models.IntegerField(default=0)
 
+    def update_card_set(self, resource_type: str, inc: int):
+        if resource_type == 'lumber':
+            self.lumber = self.lumber + inc
+        elif resource_type == 'brick':
+            self.brick = self.brick + inc
+        elif resource_type == 'wool':
+            self.wool = self.wool + inc
+        elif resource_type == 'grain':
+            self.grain = self.grain + inc
+        elif resource_type == 'ore':
+            self.ore = self.ore + inc
+        elif resource_type == 'dev_knight':
+            self.dev_knight = self.dev_knight + inc
+        elif resource_type == 'dev_one_victory_point':
+            self.dev_one_victory_point = self.dev_one_victory_point + inc
+        elif resource_type == 'dev_road_building':
+            self.dev_road_building = self.dev_road_building + inc
+        elif resource_type == 'dev_monopoly':
+            self.dev_monopoly = self.dev_monopoly + inc
+        else:
+            self.dev_year_of_plenty = self.dev_year_of_plenty + inc
+
 
 class Player(models.Model):
-    card_set = models.OneToOneField(CardSet, on_delete=models.CASCADE)
+    card_set: CardSet = models.OneToOneField(CardSet, on_delete=models.CASCADE)
     order = models.IntegerField(default=0)
+    user_id = models.IntegerField(default=0)
     color = models.CharField(max_length=10)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
 
 
 class Bank(models.Model):
-    card_set = models.OneToOneField(CardSet, on_delete=models.CASCADE)
+    card_set: CardSet = models.OneToOneField(CardSet, on_delete=models.CASCADE)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
 
 
@@ -62,13 +85,13 @@ class HarborLand(models.Model):
 
 
 class Tile(models.Model):
-    LUMBER = 'LR'
-    BRICK = 'BK'
-    WOOL = 'WL'
-    GRAIN = 'GN'
-    ORE = 'OE'
-    DESERT = 'DT'
-    SEA = 'SE'
+    LUMBER = 'LUMBER'
+    BRICK = 'BRICK'
+    WOOL = 'W00L'
+    GRAIN = 'GRAIN'
+    ORE = 'ORE'
+    DESERT = 'DESERT'
+    SEA = 'SEA'
     RESOURCE_TYPE = [
         (LUMBER, 'Lumber'),
         (BRICK, 'Brick'),
@@ -103,7 +126,7 @@ class Construction(models.Model):
         max_length=10,
         choices=BUILDING_TYPE,
         default=ROAD)
-    owner = models.ForeignKey(Player, on_delete=models.CASCADE)
+    owner: Player = models.ForeignKey(Player, on_delete=models.CASCADE)
     x = models.IntegerField(default=0)
     y = models.IntegerField(default=0)
     z = models.IntegerField(default=0)
@@ -143,12 +166,22 @@ class Game(models.Model):
     ]
 
     map_name = models.CharField(max_length=200)
+    state = models.CharField(max_length=200)
     turn_id = models.IntegerField(default=0)
     status = models.CharField(
         max_length=2,
         choices=GAME_STATUS,
         default=SETTLE)
     number_of_player = models.PositiveIntegerField(default=2)
-    current_player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name='current_game')
+    current_player = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str({
+            'map_name': self.map_name,
+            'state': self.state,
+            'status': self.status,
+            'number_of_player': self.number_of_player,
+            'current_player': self.current_player
+        })
 
 

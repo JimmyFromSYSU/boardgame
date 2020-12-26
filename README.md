@@ -30,6 +30,8 @@ js游戏引擎: [Crafty](https://github.com/craftyjs/Crafty)
 ```
 # install channels
 python3 -m pip install channels
+python3 -m pip install pytest-mock
+
 
 # install redis
 brew install redis
