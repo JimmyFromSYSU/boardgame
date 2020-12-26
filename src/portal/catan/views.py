@@ -13,4 +13,10 @@ class CatanRoomView(LoginRequiredMixin, View):
     # redirect_field_name = 'redirect_to'
 
     def get(self, request):
-        return render(request, 'catan/catan_room.html', context={'title': 'Catan Room'})
+
+        if 'room_id' in request.GET:
+            room_id = request.GET['room_id']
+        else:
+            # TODO: go to room list page
+            room_id = 0
+        return render(request, 'catan/catan_room.html', context={'title': 'Catan Room', 'room_id': room_id,})

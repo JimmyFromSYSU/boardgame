@@ -1,4 +1,7 @@
 from typing import Dict, Tuple
+import time
+from channels.db import database_sync_to_async
+from django.contrib.auth.models import User
 
 DiceHistory = {}
 RobberHistory = {}
@@ -60,3 +63,50 @@ def init_game(
 
         order = order + 1
     return (game_id, user_to_player, player_orders)
+
+
+
+##########################################
+# Game Room
+##########################################
+
+Room = {}
+
+def update_user(user_id, room_id, color=None):
+    user_id = str(user_id)
+    room_id = str(room_id)
+    if room_id not in Room:
+        Room[room_id] = {
+            'host': None,
+            'users': {},
+        }
+
+    if Room[room_id]['host'] is None:
+        Room[room_id]['host'] = user_id
+
+    users = Room[room_id]['users']
+
+    if user_id in users:
+        user = users[user_id]
+        if color is None:
+            color = user['color']
+
+    users[user_id] = {
+            'last_update': int(time.time()),
+            'is_active': True,
+            'color': color,
+        }
+
+
+
+@database_sync_to_async
+def get_users_in_room(room_id):
+    room_id = str(room_id)
+    if room_id not in Room:
+        return []
+    else:
+        now_ = int(time.time())
+        threshold = 10
+        user_ids = [id_ for id_, info in Room[room_id]['users'].items() if info['is_active'] and info['last_update'] + threshold > now_]
+        users = [User.objects.get(id=user_id) for user_id in user_ids]
+        return users

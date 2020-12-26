@@ -39,3 +39,5 @@ git:
 # python3 manage.py createsuperuser
 # user: zhiliu
 # pw: 12345678-Liu
+# user: michael
+# pw?: 12345678-Gu
