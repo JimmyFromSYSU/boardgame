@@ -35,6 +35,9 @@ image:
 git:
 	git push https://github.com/JimmyFromSYSU/boardgame.git master
 
+test:
+	python3 ./src/portal/manage.py test catan
+
 
 # python3 manage.py createsuperuser
 # user: zhiliu
