@@ -19,18 +19,19 @@
             <div id="config_setup">
                 <div class="form-group">
                     <label for="exampleFormControlSelect1"> Map </label>
-                    <select class="form-control" id="exampleFormControlSelect1">
-                        <option>六边形</option>
-                        <option>扩展1</option>
-                        <option>扩展2</option>
-                        <option>岛国</option>
-                        <option>大陆</option>
+                    <select class="form-control" id="map_select" @change="onChangeMap($event)">
+                        <option
+                            v-for="(item , index) in maps"
+                            v-bind:value="item.name"
+                            :selected= "item.selected == true" >
+                            [[item.display_name]]
+                        </option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="exampleFormControlSelect1"> Color </label>
-                    <select class="form-control" id="exampleFormControlSelect1">
+                    <select class="form-control" id="color_select">
                         <option>红</option>
                         <option>绿</option>
                         <option>蓝</option>
@@ -46,7 +47,7 @@
                     </label>
                 </div>
                 <div class="mt-2 text-center">
-                    <button type="button" class="btn btn-success">开始游戏</button>
+                    <button type="button" class="btn btn-success" @click="startGame">开始游戏</button>
                 </div>
             </div>
         </div>

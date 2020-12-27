@@ -56,18 +56,18 @@ class CatanBaseController:
     def initial_game(self, map_name, user_colors: Dict[int, str]) -> Dict[str, Any]:
         player_num = len(user_colors)
         current_player = random.randint(0, player_num-1)
-        curr_game = Game(map_name=map_name, current_player=0, num_of_player=player_num)
-        
+        curr_game = Game(map_name=map_name, current_player=0, number_of_player=player_num)
+
         bank_card_set = CardSet(
-            lumber=BANK_RESOURCE_NUM,  
+            lumber=BANK_RESOURCE_NUM,
             brick=BANK_RESOURCE_NUM,
-            wool=BANK_RESOURCE_NUM,  
-            grain=BANK_RESOURCE_NUM,  
-            ore=BANK_RESOURCE_NUM,  
-            dev_knight=BANK_RESOURCE_NUM,  
-            dev_one_victory_point=BANK_RESOURCE_NUM,  
-            dev_road_building=BANK_RESOURCE_NUM,  
-            dev_monopoly=BANK_RESOURCE_NUM,  
+            wool=BANK_RESOURCE_NUM,
+            grain=BANK_RESOURCE_NUM,
+            ore=BANK_RESOURCE_NUM,
+            dev_knight=BANK_RESOURCE_NUM,
+            dev_one_victory_point=BANK_RESOURCE_NUM,
+            dev_road_building=BANK_RESOURCE_NUM,
+            dev_monopoly=BANK_RESOURCE_NUM,
             dev_year_of_plenty=BANK_RESOURCE_NUM)
         bank = Bank(card_set=bank_card_set, game=curr_game)
 
@@ -88,7 +88,9 @@ class CatanBaseController:
             type_name = tile['name']
             tile = Tile(
                 type=self.__get_tile_type(type_name),
-                number=tile['number'],
+                # TODO: add numer to map_template
+                # number=tile['number'],
+                number=random.randint(2, 12),
                 x=tile['x'],
                 y=tile['y'],
                 game=curr_game)
@@ -235,10 +237,3 @@ class CatanBaseController:
     # 玩家从受害者随机抽取卡牌。如果受害者没有卡牌，则返回none。
     def get_random_resource(self, game_id, user_id, victim_id) -> Optional[CardType]:
         pass
-
-
-
-
-
-
-
