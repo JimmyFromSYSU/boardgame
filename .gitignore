@@ -4,5 +4,6 @@
 /wiki/*.log
 /wiki/*.out
 /.idea/*
+/src/portal/catan/migrations/*
 *.sqlite3
 *.pyc

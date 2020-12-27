@@ -45,6 +45,10 @@ class Player(models.Model):
     color = models.CharField(max_length=10)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
 
+    def save_all(self):
+        self.card_set.save()
+        self.save()
+
 
 class Bank(models.Model):
     card_set: CardSet = models.OneToOneField(CardSet, on_delete=models.CASCADE)
@@ -142,6 +146,10 @@ class DiceHistory(models.Model):
 
     def sum(self):
         return self.dice1 + self.dice2
+
+    def save_all(self):
+        self.player.save_all()
+        self.save()
 
 
 class RobberHistory(models.Model):
