@@ -55,9 +55,9 @@ class CatanBaseController:
     # 初始化开始顺序，保存Player，Bank,以及整个地图（Tiles）到数据库。
     def initial_game(self, map_name, user_colors: Dict[int, str]) -> Dict[str, Any]:
         player_num = len(user_colors)
-        current_player = random.randint(0, player_num-1)
+        first_player = random.randint(0, player_num-1)
         curr_game = Game(map_name=map_name, current_player=0, number_of_player=player_num)
-        curr_game.save()
+        curr_game.save_all()
         
         bank_card_set = CardSet(
             lumber=BANK_RESOURCE_NUM,  
@@ -77,7 +77,7 @@ class CatanBaseController:
         player_orders = {}
         for user_id, user_color in user_colors.items():
             player_card_set = CardSet()
-            order = (order - current_player + player_num) % player_num
+            order = (order - first_player + player_num) % player_num
             player = Player(
                 card_set=player_card_set, order=order, color=user_color, game=curr_game, user_id=user_id)
             player.save_all()
@@ -87,6 +87,7 @@ class CatanBaseController:
         map = CATAN_MAPS[map_name]
         robber_dict = map['robber']
         robber_history = RobberHistory(turn_id=0, game=curr_game)
+        robber_history.save()
         for tile in map['tiles']:
             type_name = tile['name']
             tile = Tile(

@@ -183,6 +183,9 @@ class Game(models.Model):
     number_of_player = models.PositiveIntegerField(default=2)
     current_player = models.IntegerField(default=0)
 
+    def save_all(self):
+        self.save()
+
     def __str__(self):
         return str({
             'map_name': self.map_name,

@@ -49,6 +49,10 @@ class CatanControllerTests(TestCase):
     def _get_extra_player(self):
         return Player(user_id=self.EXTRA_USER_ID, game=self.game, card_set=CardSet())
 
+    @patch("catan.logic.catan_controller.Game.save_all")
+    def test_init_game(self):
+        self.controller.initial_game('normal', {self.USER_ID: 'red', self.EXTRA_USER_ID: 'blue'})
+
     @patch("catan.logic.catan_controller.get_game")
     def test_get_game_info_successful(self, get_game_method):
         controller = CatanBaseController()
@@ -231,6 +235,7 @@ class CatanControllerTests(TestCase):
 
         score = self.controller.score(self.GAME_ID, self.USER_ID)
         assert score == expected_score
+
 
 
 
