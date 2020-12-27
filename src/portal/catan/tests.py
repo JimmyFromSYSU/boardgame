@@ -149,16 +149,29 @@ class CatanControllerTests(TestCase):
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
     def test_end_turn_status_settle_main_round(self, score_method, get_game_method):
-        controller = CatanBaseController()
         game = self._get_game()
         game.turn_id = 2 * self.PLAYER_NUM
         get_game_method.return_value = game
         expected_player = (game.current_player + 1) % self.PLAYER_NUM
         score_method.return_value = 2
 
-        controller.end_turn(self.GAME_ID)
+        self.controller.end_turn(self.GAME_ID)
         assert game.status == Game.MAIN
         assert game.current_player == expected_player
+
+    @patch("catan.logic.catan_controller.get_game")
+    @patch("catan.logic.catan_controller.get_player_by_order")
+    @patch("catan.logic.catan_controller.DiceHistory.save_all")
+    def test_roll_dice(self, dice_history_save_all_method, get_player_by_order_method, get_game_method):
+        get_game_method.return_value = self._get_game()
+        get_player_by_order_method.return_value = self._get_player()
+        dice1, dice2 = self.controller.roll_dice(self.GAME_ID, self.USER_ID)
+
+        assert dice1 >= 1
+        assert dice1 <= 6
+        assert dice2 >= 1
+        assert dice2 <= 6
+
 
     @patch("catan.logic.catan_controller.get_bank")
     @patch("catan.logic.catan_controller.get_player_by_user_id")
