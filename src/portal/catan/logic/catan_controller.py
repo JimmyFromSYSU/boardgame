@@ -56,7 +56,8 @@ class CatanBaseController:
     def initial_game(self, map_name, user_colors: Dict[int, str]) -> Dict[str, Any]:
         player_num = len(user_colors)
         current_player = random.randint(0, player_num-1)
-        curr_game = Game(map_name=map_name, current_player=0, num_of_player=player_num)
+        curr_game = Game(map_name=map_name, current_player=0, number_of_player=player_num)
+        curr_game.save()
         
         bank_card_set = CardSet(
             lumber=BANK_RESOURCE_NUM,  
@@ -70,6 +71,7 @@ class CatanBaseController:
             dev_monopoly=BANK_RESOURCE_NUM,  
             dev_year_of_plenty=BANK_RESOURCE_NUM)
         bank = Bank(card_set=bank_card_set, game=curr_game)
+        bank.save()
 
         order = 0
         player_orders = {}
@@ -78,6 +80,7 @@ class CatanBaseController:
             order = (order - current_player + player_num) % player_num
             player = Player(
                 card_set=player_card_set, order=order, color=user_color, game=curr_game, user_id=user_id)
+            player.save_all()
             player_orders[player.id] = order
             order += 1
 
@@ -88,10 +91,11 @@ class CatanBaseController:
             type_name = tile['name']
             tile = Tile(
                 type=self.__get_tile_type(type_name),
-                number=tile['number'],
+                number=5,
                 x=tile['x'],
                 y=tile['y'],
                 game=curr_game)
+            tile.save()
 
         return {'game_id': curr_game.id, 'player_orders': player_orders}
 
@@ -102,6 +106,9 @@ class CatanBaseController:
         construction = get_construction(game_id, cx, cy, cz)
         construction.owner = player
         construction.type = ctype
+        # player.card_set.save()
+        # player.save()
+        # construction.save()
         return True
 
     # 玩家结束回合，更新Game的status，curr_player, turn_id
@@ -146,6 +153,7 @@ class CatanBaseController:
         dice2 = random.randint(1, 6)
 
         dice_history = DiceHistory(dice1=dice1, dice2=dice2, game=game, player=player, turn_id=game.turn_id)
+        dice_history.save_all()
         return dice1, dice2
 
     # Note: dice_sum is from 2~12.
@@ -190,7 +198,6 @@ class CatanBaseController:
 
         resource_cards = self.__build_cardset_dict(cards)
         for resource_type, num in resource_cards.items():
-            # todo move to cardSet model
             player_card_set.update_card_set(resource_type, num)
             bank_card_set.update_card_set(resource_type, -num)
         return True
