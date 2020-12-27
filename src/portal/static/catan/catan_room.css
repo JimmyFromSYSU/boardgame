@@ -5,9 +5,10 @@ body {
 
 #catan_room {
     margin-top: 60px;
+    padding: 10px;
     margin-left: auto;
     margin-right: auto;
-    width: 50%;
+    max-width: 500px;
     cursor: pointer;
     /* border-style: solid; */
 }

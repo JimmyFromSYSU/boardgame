@@ -181,6 +181,7 @@ class Game(models.Model):
         choices=GAME_STATUS,
         default=SETTLE)
     number_of_player = models.PositiveIntegerField(default=2)
+    # TODO: rename to current_player_order
     current_player = models.IntegerField(default=0)
 
     def __str__(self):
@@ -191,5 +192,3 @@ class Game(models.Model):
             'number_of_player': self.number_of_player,
             'current_player': self.current_player
         })
-
-

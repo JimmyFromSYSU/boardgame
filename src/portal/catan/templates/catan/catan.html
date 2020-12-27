@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block content %}
+<div id="uid" class="d-none">{{request.user.id}}</div>
+<div id="rid" class="d-none">{{room_id}}</div>
 <div id="catan_game"></div>
 {% endblock %}
 

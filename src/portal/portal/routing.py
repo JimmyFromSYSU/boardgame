@@ -6,7 +6,7 @@ from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator, OriginValidator
 # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 
-from catan.consumers import CatanConsumer
+from catan.consumers import CatanConsumer, CatanRoomConsumer
 
 application = ProtocolTypeRouter({
     # "http": get_asgi_application(),
@@ -15,7 +15,8 @@ application = ProtocolTypeRouter({
         AuthMiddlewareStack(
             URLRouter(
                 [
-                    url(r'^catan/', CatanConsumer),
+                    url(r'^catan/$', CatanConsumer),
+                    url(r'^catan/room/$', CatanRoomConsumer),
                 ]
             )
         )

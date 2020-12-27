@@ -55,43 +55,57 @@ class CatanBaseController:
     # 初始化开始顺序，保存Player，Bank,以及整个地图（Tiles）到数据库。
     def initial_game(self, map_name, user_colors: Dict[int, str]) -> Dict[str, Any]:
         player_num = len(user_colors)
-        current_player = random.randint(0, player_num-1)
         curr_game = Game(map_name=map_name, current_player=0, number_of_player=player_num)
         curr_game.save()
-        
+
         bank_card_set = CardSet(
-            lumber=BANK_RESOURCE_NUM,  
+            lumber=BANK_RESOURCE_NUM,
             brick=BANK_RESOURCE_NUM,
-            wool=BANK_RESOURCE_NUM,  
-            grain=BANK_RESOURCE_NUM,  
-            ore=BANK_RESOURCE_NUM,  
-            dev_knight=BANK_RESOURCE_NUM,  
-            dev_one_victory_point=BANK_RESOURCE_NUM,  
-            dev_road_building=BANK_RESOURCE_NUM,  
-            dev_monopoly=BANK_RESOURCE_NUM,  
+            wool=BANK_RESOURCE_NUM,
+            grain=BANK_RESOURCE_NUM,
+            ore=BANK_RESOURCE_NUM,
+            dev_knight=BANK_RESOURCE_NUM,
+            dev_one_victory_point=BANK_RESOURCE_NUM,
+            dev_road_building=BANK_RESOURCE_NUM,
+            dev_monopoly=BANK_RESOURCE_NUM,
             dev_year_of_plenty=BANK_RESOURCE_NUM)
+        bank_card_set.save()
         bank = Bank(card_set=bank_card_set, game=curr_game)
         bank.save()
 
-        order = 0
         player_orders = {}
+        # 假如有4个user，user0~user3。
+        # 设first_player_index=2，即user2的order为0
+        #         order    index
+        # ---------------------
+        # user0     2        0
+        # user1     3        1
+        # user2     0        2
+        # user3     1        3
+        # 则 order = (index - first_player_index + player_num) % player_num
+        first_player_index = random.randint(0, player_num-1)
+        index = 0
         for user_id, user_color in user_colors.items():
             player_card_set = CardSet()
-            order = (order - current_player + player_num) % player_num
+            order = (index - first_player_index + player_num) % player_num
             player = Player(
                 card_set=player_card_set, order=order, color=user_color, game=curr_game, user_id=user_id)
             player.save_all()
-            player_orders[player.id] = order
-            order += 1
+            player_orders[user_id] = order
+            index += 1
 
         map = CATAN_MAPS[map_name]
         robber_dict = map['robber']
         robber_history = RobberHistory(turn_id=0, game=curr_game)
+        # TODO: Exception inside application: NOT NULL constraint failed: catan_robberhistory.player_id
+        # robber_history.save()
         for tile in map['tiles']:
             type_name = tile['name']
             tile = Tile(
                 type=self.__get_tile_type(type_name),
-                number=5,
+                # TODO: add numer to map_template
+                # number=tile['number'],
+                number=random.randint(2, 12),
                 x=tile['x'],
                 y=tile['y'],
                 game=curr_game)
@@ -242,10 +256,3 @@ class CatanBaseController:
     # 玩家从受害者随机抽取卡牌。如果受害者没有卡牌，则返回none。
     def get_random_resource(self, game_id, user_id, victim_id) -> Optional[CardType]:
         pass
-
-
-
-
-
-
-
