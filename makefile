@@ -10,6 +10,10 @@ server:
 	# brew services start redis
 	# lsof -i:5001
 	# kill -9 PID
+	# # Delete all files in migrations folder
+	# # Delete all rows in portal/db.sqlite3 -> django_migrations
+	# python src/portal/manage.py makemigrations catan
+	# python src/portal/manage.py migrate catan --database=catan
 	python src/portal/manage.py runserver 0.0.0.0:5001
 
 readme:

@@ -206,11 +206,12 @@ class CatanRoomConsumer(AsyncConsumer):
             }
         )
 
-    @database_sync_to_async
-    def get_users(self, user_ids):
-        users = [User.objects.get(id=user_id) for user_id in user_ids]
-        return users
+    # @database_sync_to_async
+    # def get_users(self, user_ids):
+    #     users = [User.objects.get(id=user_id) for user_id in user_ids]
+    #     return users
 
+    @database_sync_to_async
     def create_game(self, room_id):
         controller = CatanBaseController()
         map_name = get_selected_map(room_id)
@@ -268,7 +269,7 @@ class CatanRoomConsumer(AsyncConsumer):
                 self.print_event("CHANGE_COLOR", "CHANGE_COLOR")
             elif request['action'] == "START_GAME":
                 self.print_event("START_GAME", "START_GAME")
-                self.create_game(room_id)
+                await self.create_game(room_id)
                 response = {'action': 'COMFIRM_START_GAME'}
 
         # NOTE: print room_data for debug
