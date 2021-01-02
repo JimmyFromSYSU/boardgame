@@ -15,6 +15,7 @@ from .constans import SCORE_TO_WIN
 from .map_template import CATAN_MAPS
 from ..db.catan_database import get_player_by_user_id
 from ..db.catan_database import get_player_by_order
+from ..db.catan_database import get_players
 from ..db.catan_database import get_constructions
 from ..db.catan_database import get_construction_by_location
 from ..db.catan_database import get_tiles_by_number
@@ -255,6 +256,14 @@ class CatanBaseController:
     def get_bank_card_set(self, game_id) -> CardSetDict:
         bank = get_bank(game_id)
         return model_to_dict(bank.card_set)
+
+    # 返回当前游戏所以玩家的player_id
+    def get_player_id_list(self, game_id) -> List[int]:
+        return [player.id for player in get_players(game_id)]
+
+    # 返回指定玩家的颜色
+    def get_player_color(self, game_id, user_id) -> str:
+        return get_player_by_user_id(game_id, user_id).color
 
     # 返回资源给银行，指定玩家得到一张随机技能卡，保存数据库。
     def trade_random_development_card(self, game_id, user_id) -> CardType:

@@ -318,6 +318,27 @@ class CatanControllerTests(TestCase):
         result = self.controller.get_bank_card_set(self.GAME_ID)
         assert result == expected
 
+    @patch("catan.logic.catan_controller.get_players")
+    def test_get_player_id_list(self, get_players_method):
+        player_1 = self._get_player()
+        player_2 = self._get_extra_player()
+        get_players_method.return_value = [player_1, player_2]
+
+        expected = [player_1.id, player_2.id]
+
+        result = self.controller.get_player_id_list(self.GAME_ID)
+        assert result == expected
+
+    @patch("catan.logic.catan_controller.get_player_by_user_id")
+    def test_get_player_color(self, get_player_method):
+        player = self._get_player()
+        get_player_method.return_value = player
+
+        expected = player.color
+
+        result = self.controller.get_player_color(self.GAME_ID, self.USER_ID)
+        assert result == expected
+
 
 
 

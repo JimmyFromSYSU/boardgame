@@ -10,8 +10,12 @@ def get_player_by_user_id(game_id, user_id) -> Player:
     return Player.objects.get(game=game_id, user_id=user_id)
 
 
-def get_player_by_order(game_id, order):
+def get_player_by_order(game_id, order) -> Player:
     return Player.objects.get(game=game_id, order=order)
+
+
+def get_players(game_id) -> List[Player]:
+    return Player.objects.filter(game=game_id)
 
 
 def get_constructions(game_id) -> List[Construction]:
