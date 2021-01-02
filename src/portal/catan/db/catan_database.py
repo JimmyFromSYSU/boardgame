@@ -14,8 +14,12 @@ def get_player_by_order(game_id, order):
     return Player.objects.get(game=game_id, order=order)
 
 
-def get_construction(game_id, cx, cy, cz):
-    return Construction.objects.get(game=game_id, x=cx, y=cy, z=cz)
+def get_constructions(game_id) -> List[Construction]:
+    return Construction.objects.filter(game=game_id)
+
+
+def get_construction_by_location(game_id, cx, cy, cz) -> Construction:
+    return Construction.objects.get_or_create(game=game_id, x=cx, y=cy, z=cz)
 
 
 def get_houses(game_id, cx, cy) -> List[Construction]:
@@ -42,5 +46,9 @@ def get_bank(game_id):
     return Bank.objects.get(game=game_id)
 
 
-def get_tiles_by_number(dice_sum: int) -> List[Tile]:
-    return Tile.objects.filter(number=dice_sum)
+def get_tiles_by_number(game_id:int, dice_sum: int) -> List[Tile]:
+    return Tile.objects.filter(game=game_id, number=dice_sum)
+
+
+def get_tiles(game_id: int) -> List[Tile]:
+    return Tile.objects.filter(game=game_id)

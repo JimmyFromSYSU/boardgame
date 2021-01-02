@@ -1,5 +1,6 @@
 import random
 from typing import Dict, Any, List, Tuple, Optional
+from django.forms.models import model_to_dict
 from collections import Counter
 from ..models import Game
 from ..models import Bank
@@ -14,10 +15,12 @@ from .constans import SCORE_TO_WIN
 from .map_template import CATAN_MAPS
 from ..db.catan_database import get_player_by_user_id
 from ..db.catan_database import get_player_by_order
-from ..db.catan_database import get_construction
+from ..db.catan_database import get_constructions
+from ..db.catan_database import get_construction_by_location
 from ..db.catan_database import get_tiles_by_number
 from ..db.catan_database import get_houses
 from ..db.catan_database import get_towns
+from ..db.catan_database import get_tiles
 from ..db.catan_database import count_houses_by_user_id
 from ..db.catan_database import count_towns_by_user_id
 from ..db.catan_database import get_game
@@ -55,48 +58,59 @@ class CatanBaseController:
     # 初始化开始顺序，保存Player，Bank,以及整个地图（Tiles）到数据库。
     def initial_game(self, map_name, user_colors: Dict[int, str]) -> Dict[str, Any]:
         player_num = len(user_colors)
-        first_player = random.randint(0, player_num-1)
         curr_game = Game(map_name=map_name, current_player=0, number_of_player=player_num)
         curr_game.save_all()
-        
+
         bank_card_set = CardSet(
-            lumber=BANK_RESOURCE_NUM,  
+            lumber=BANK_RESOURCE_NUM,
             brick=BANK_RESOURCE_NUM,
-            wool=BANK_RESOURCE_NUM,  
-            grain=BANK_RESOURCE_NUM,  
-            ore=BANK_RESOURCE_NUM,  
-            dev_knight=BANK_RESOURCE_NUM,  
-            dev_one_victory_point=BANK_RESOURCE_NUM,  
-            dev_road_building=BANK_RESOURCE_NUM,  
-            dev_monopoly=BANK_RESOURCE_NUM,  
+            wool=BANK_RESOURCE_NUM,
+            grain=BANK_RESOURCE_NUM,
+            ore=BANK_RESOURCE_NUM,
+            dev_knight=BANK_RESOURCE_NUM,
+            dev_one_victory_point=BANK_RESOURCE_NUM,
+            dev_road_building=BANK_RESOURCE_NUM,
+            dev_monopoly=BANK_RESOURCE_NUM,
             dev_year_of_plenty=BANK_RESOURCE_NUM)
         bank = Bank(card_set=bank_card_set, game=curr_game)
-        bank.save()
+        bank.save_all()
 
-        order = 0
         player_orders = {}
+        # 假如有4个user，user0~user3。
+        # 设first_player_index=2，即user2的order为0
+        #         order    index
+        # ---------------------
+        # user0     2        0
+        # user1     3        1
+        # user2     0        2
+        # user3     1        3
+        # 则 order = (index - first_player_index + player_num) % player_num
+        first_player_index = random.randint(0, player_num-1)
+        index = 0
         for user_id, user_color in user_colors.items():
             player_card_set = CardSet()
-            order = (order - first_player + player_num) % player_num
+            order = (index - first_player_index + player_num) % player_num
             player = Player(
                 card_set=player_card_set, order=order, color=user_color, game=curr_game, user_id=user_id)
             player.save_all()
-            player_orders[player.id] = order
-            order += 1
+            player_orders[user_id] = order
+            index += 1
 
         map = CATAN_MAPS[map_name]
-        robber_dict = map['robber']
-        robber_history = RobberHistory(turn_id=0, game=curr_game)
-        robber_history.save()
+        # robber_dict = map['robber']
+        # robber_history = RobberHistory(turn_id=0, game=curr_game)
+        # TODO: Exception inside application: NOT NULL constraint failed: catan_robberhistory.player_id
+        # robber_history.save()
         for tile in map['tiles']:
             type_name = tile['name']
             tile = Tile(
                 type=self.__get_tile_type(type_name),
-                number=5,
+                # TODO: add number to map_template
+                number=random.randint(2, 12),
                 x=tile['x'],
                 y=tile['y'],
                 game=curr_game)
-            tile.save()
+            tile.save_all()
 
         return {'game_id': curr_game.id, 'player_orders': player_orders}
 
@@ -104,12 +118,10 @@ class CatanBaseController:
     # 在指定位置放置Construction，并删除旧的Construction
     def place_construction(self, game_id, user_id, cx, cy, cz, ctype: str) -> bool:
         player = get_player_by_user_id(game_id, user_id)
-        construction = get_construction(game_id, cx, cy, cz)
+        construction = get_construction_by_location(game_id, cx, cy, cz)
         construction.owner = player
         construction.type = ctype
-        # player.card_set.save()
-        # player.save()
-        # construction.save()
+        construction.save_all()
         return True
 
     # 玩家结束回合，更新Game的status，curr_player, turn_id
@@ -121,6 +133,7 @@ class CatanBaseController:
 
         if self.score(game_id) >= SCORE_TO_WIN:
             game.status = Game.END
+            game.save_all()
             return True
 
         if player_num <= turn_id < (2 * player_num):
@@ -136,6 +149,7 @@ class CatanBaseController:
             game.status = Game.SETTLE
         else:
             game.status = Game.MAIN
+        game.save_all()
         return True
 
     # 返回指定玩家当前得分
@@ -161,7 +175,7 @@ class CatanBaseController:
     # The keys of CardSetDict are [LIMBER, BRICK, WOOL, GRAIN, ORE]
     # 根据骰子数值计算玩家所得资源，从银行移动资源到玩家，保存银行和玩家的资源到数据库。
     def compute_resource(self, game_id, dice_sum: int) -> Dict[UserId, CardSetDict]:
-        tiles = get_tiles_by_number(dice_sum)
+        tiles = get_tiles_by_number(game_id, dice_sum)
         user_resource_dict: Dict[UserId, List[str]] = {}
         user_card_set_dict: Dict[UserId, CardSetDict] = {}
 
@@ -201,6 +215,9 @@ class CatanBaseController:
         for resource_type, num in resource_cards.items():
             player_card_set.update_card_set(resource_type, num)
             bank_card_set.update_card_set(resource_type, -num)
+
+        bank.save_all()
+        player.save_all()
         return True
 
     # 返回当前游戏信息
@@ -218,6 +235,26 @@ class CatanBaseController:
             'state': state,
             'current_player_id': current_player_id
         }
+
+    # 返回地图资源, 包括Tiles, Constructions, (Current Robber).
+    def get_map_resource(self, game_id) -> List[Dict[str, Any]]:
+        tiles = get_tiles(game_id)
+        constructions = get_constructions(game_id)
+
+        map_resource = {'tiles': [model_to_dict(tile) for tile in tiles],
+                        'constructions': [model_to_dict(construction) for construction in constructions]}
+
+        return map_resource
+
+    # 返回每个玩家手牌
+    def get_player_card_set(self, game_id, user_id) -> CardSetDict:
+        player = get_player_by_user_id(game_id, user_id)
+        return model_to_dict(player.card_set)
+
+    # 返回每个银行牌数
+    def get_bank_card_set(self, game_id) -> CardSetDict:
+        bank = get_bank(game_id)
+        return model_to_dict(bank.card_set)
 
     # 返回资源给银行，指定玩家得到一张随机技能卡，保存数据库。
     def trade_random_development_card(self, game_id, user_id) -> CardType:
@@ -243,10 +280,3 @@ class CatanBaseController:
     # 玩家从受害者随机抽取卡牌。如果受害者没有卡牌，则返回none。
     def get_random_resource(self, game_id, user_id, victim_id) -> Optional[CardType]:
         pass
-
-
-
-
-
-
-

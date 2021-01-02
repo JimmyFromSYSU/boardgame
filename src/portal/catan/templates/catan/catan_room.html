@@ -4,7 +4,8 @@
 {% block content %}
 <div id="catan_room">
 
-
+    <div id="uid" class="d-none">{{request.user.id}}</div>
+    <div id="rid" class="d-none">{{room_id}}</div>
     <div class="card">
         <div class="card-header">
             <div id="logout_button">
@@ -13,14 +14,44 @@
             <h2>Catan Room ({{request.user.first_name}})</h2>
         </div>
         <div class="card-body">
-            <div id="user_list">all users  </div>
+            Online users: <div id="user_list">  </div>
             <hr/>
-            <div id="config_setup"> 223</div>
+            <div id="config_setup">
+                <div class="form-group">
+                    <label for="exampleFormControlSelect1"> Map </label>
+                    <select class="form-control" id="map_select" @change="onChangeMap($event)">
+                        <option
+                            v-for="(item , index) in maps"
+                            v-bind:value="item.name"
+                            :selected= "item.selected == true" >
+                            [[item.display_name]]
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="exampleFormControlSelect1"> Color </label>
+                    <select class="form-control" id="color_select">
+                        <option>红</option>
+                        <option>绿</option>
+                        <option>蓝</option>
+                        <option>橙</option>
+                        <option>紫</option>
+                    </select>
+                </div>
+
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="ready_check">
+                    <label class="custom-control-label" for="ready_check">
+                        I'm Ready
+                    </label>
+                </div>
+                <div class="mt-2 text-center">
+                    <button type="button" class="btn btn-success" @click="startGame">开始游戏</button>
+                </div>
+            </div>
         </div>
       </div>
-
-
-
     <div>
 
     <!-- <p> {{request.user.username}} </p> -->
@@ -34,6 +65,7 @@
 
 {% block js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
+<script src="{% static 'catan/catan_room.js' %}"></script>
 {% endblock %}
 
 

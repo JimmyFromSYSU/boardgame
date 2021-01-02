@@ -1,4 +1,6 @@
+import random
 from django.test import TestCase
+from django.forms.models import model_to_dict
 from unittest.mock import patch
 from .models import Game
 from .models import Construction
@@ -50,28 +52,29 @@ class CatanControllerTests(TestCase):
         return Player(user_id=self.EXTRA_USER_ID, game=self.game, card_set=CardSet())
 
     @patch("catan.logic.catan_controller.Game.save_all")
-    def test_init_game(self):
-        self.controller.initial_game('normal', {self.USER_ID: 'red', self.EXTRA_USER_ID: 'blue'})
+    @patch("catan.logic.catan_controller.Bank.save_all")
+    @patch("catan.logic.catan_controller.Player.save_all")
+    @patch("catan.logic.catan_controller.Tile.save_all")
+    @patch("catan.logic.catan_controller.random.randint")
+    def test_init_game(self, randint_method, tile_save, player_save, bank_save, game_save):
+        randint_method.return_value = 1
 
-    @patch("catan.logic.catan_controller.get_game")
-    def test_get_game_info_successful(self, get_game_method):
-        controller = CatanBaseController()
-        get_game_method.return_value = self._get_game()
-
+        # expected game_id is None since no game is actually created.
         expected = {
-            'turn_id': 0,
-            'number_of_player': 4,
-            'status': Game.SETTLE,
-            'state': 'START',
-            'current_player_id': 0
+            'game_id': None,
+            'player_orders': {
+                self.USER_ID: 1,
+                self.EXTRA_USER_ID: 0
+            }
         }
 
-        game_info = controller.get_game_info(self.GAME_ID)
-        assert game_info == expected
+        result = self.controller.initial_game('normal', {self.USER_ID: 'red', self.EXTRA_USER_ID: 'blue'})
+        assert result == expected
 
+    @patch("catan.logic.catan_controller.Construction.save_all")
     @patch("catan.logic.catan_controller.get_player_by_user_id")
-    @patch("catan.logic.catan_controller.get_construction")
-    def test_place_construction_successful(self, get_const_method, get_player_method):
+    @patch("catan.logic.catan_controller.get_construction_by_location")
+    def test_place_construction_successful(self, get_const_method, get_player_method, construction_save):
         controller = CatanBaseController();
         const = Construction(type=Construction.ROAD);
         player = self._get_player();
@@ -84,9 +87,10 @@ class CatanControllerTests(TestCase):
         assert const.type == expect.type
         assert const.owner == expect.owner
 
+    @patch("catan.logic.catan_controller.Game.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
-    def test_end_turn_status_end(self, score_method, get_game_method):
+    def test_end_turn_status_end(self, score_method, get_game_method, game_save):
         controller = CatanBaseController()
         game = self._get_game()
         get_game_method.return_value = game
@@ -95,9 +99,10 @@ class CatanControllerTests(TestCase):
         controller.end_turn(self.GAME_ID)
         assert game.status == Game.END
 
+    @patch("catan.logic.catan_controller.Game.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
-    def test_end_turn_status_settle_first_found_start(self, score_method, get_game_method):
+    def test_end_turn_status_settle_first_found_start(self, score_method, get_game_method, game_save):
         controller = CatanBaseController()
         game = self._get_game()
         get_game_method.return_value = game
@@ -108,9 +113,10 @@ class CatanControllerTests(TestCase):
         assert game.status == Game.SETTLE
         assert game.current_player == expected_player
 
+    @patch("catan.logic.catan_controller.Game.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
-    def test_end_turn_status_settle_first_round_end(self, score_method, get_game_method):
+    def test_end_turn_status_settle_first_round_end(self, score_method, get_game_method, game_save):
         controller = CatanBaseController()
         game = self._get_game()
         game.turn_id = self.PLAYER_NUM - 1
@@ -122,9 +128,10 @@ class CatanControllerTests(TestCase):
         assert game.status == Game.SETTLE
         assert game.current_player == expected_player
 
+    @patch("catan.logic.catan_controller.Game.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
-    def test_end_turn_status_settle_second_round_start(self, score_method, get_game_method):
+    def test_end_turn_status_settle_second_round_start(self, score_method, get_game_method, game_save):
         controller = CatanBaseController()
         game = self._get_game()
         game.turn_id = self.PLAYER_NUM
@@ -136,9 +143,10 @@ class CatanControllerTests(TestCase):
         assert game.status == Game.SETTLE
         assert game.current_player == expected_player
 
+    @patch("catan.logic.catan_controller.Game.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
-    def test_end_turn_status_settle_second_round_end(self, score_method, get_game_method):
+    def test_end_turn_status_settle_second_round_end(self, score_method, get_game_method, game_save):
         controller = CatanBaseController()
         game = self._get_game()
         game.turn_id = 2 * self.PLAYER_NUM - 1
@@ -150,9 +158,10 @@ class CatanControllerTests(TestCase):
         assert game.status == Game.MAIN
         assert game.current_player == expected_player
 
+    @patch("catan.logic.catan_controller.Game.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.CatanBaseController.score")
-    def test_end_turn_status_settle_main_round(self, score_method, get_game_method):
+    def test_end_turn_status_settle_main_round(self, score_method, get_game_method, game_save):
         game = self._get_game()
         game.turn_id = 2 * self.PLAYER_NUM
         get_game_method.return_value = game
@@ -163,10 +172,10 @@ class CatanControllerTests(TestCase):
         assert game.status == Game.MAIN
         assert game.current_player == expected_player
 
+    @patch("catan.logic.catan_controller.DiceHistory.save_all")
     @patch("catan.logic.catan_controller.get_game")
     @patch("catan.logic.catan_controller.get_player_by_order")
-    @patch("catan.logic.catan_controller.DiceHistory.save_all")
-    def test_roll_dice(self, dice_history_save_all_method, get_player_by_order_method, get_game_method):
+    def test_roll_dice(self, get_player_by_order_method, get_game_method, dice_history_save):
         get_game_method.return_value = self._get_game()
         get_player_by_order_method.return_value = self._get_player()
         dice1, dice2 = self.controller.roll_dice(self.GAME_ID, self.USER_ID)
@@ -176,10 +185,11 @@ class CatanControllerTests(TestCase):
         assert dice2 >= 1
         assert dice2 <= 6
 
-
+    @patch("catan.logic.catan_controller.Bank.save_all")
+    @patch("catan.logic.catan_controller.Player.save_all")
     @patch("catan.logic.catan_controller.get_bank")
     @patch("catan.logic.catan_controller.get_player_by_user_id")
-    def test_distribute_resource_from_bank_successful(self, get_player_method, get_bank_method):
+    def test_distribute_resource_from_bank_successful(self, get_player_method, get_bank_method, player_save, bank_save):
         bank = self._get_bank()
         player = self._get_player()
         get_bank_method.return_value = bank
@@ -236,6 +246,77 @@ class CatanControllerTests(TestCase):
         score = self.controller.score(self.GAME_ID, self.USER_ID)
         assert score == expected_score
 
+    @patch("catan.logic.catan_controller.get_game")
+    def test_get_game_info_successful(self, get_game_method):
+        controller = CatanBaseController()
+        get_game_method.return_value = self._get_game()
+
+        expected = {
+            'turn_id': 0,
+            'number_of_player': 4,
+            'status': Game.SETTLE,
+            'state': 'START',
+            'current_player_id': 0
+        }
+
+        game_info = controller.get_game_info(self.GAME_ID)
+        assert game_info == expected
+
+    @patch("catan.logic.catan_controller.get_tiles")
+    @patch("catan.logic.catan_controller.get_constructions")
+    def test_get_map_resource(self, get_constructions_method, get_tiles_method):
+        player = self._get_player()
+        extra_player = self._get_extra_player()
+        test_tile1 = Tile(type=Tile.GRAIN, x=random.randint(0, 5), y=random.randint(0, 5), number=random.randint(2, 12))
+        test_tile2 = Tile(type=Tile.GRAIN, x=random.randint(0, 5), y=random.randint(0, 5), number=random.randint(2, 12))
+        test_tile3 = Tile(type=Tile.GRAIN, x=random.randint(0, 5), y=random.randint(0, 5), number=random.randint(2, 12))
+        test_construction1 = Construction(type=Construction.ROAD, x=random.randint(0, 5), y=random.randint(0, 5),
+                                          z=random.randint(-1, 1), owner=player)
+        test_construction2 = Construction(type=Construction.HOUSE, x=random.randint(0, 5), y=random.randint(0, 5),
+                                          z=random.randint(-1, 1), owner=player)
+        test_construction3 = Construction(type=Construction.TOWN, x=random.randint(0, 5), y=random.randint(0, 5),
+                                          z=random.randint(-1, 1), owner=extra_player)
+
+        tiles = [test_tile1, test_tile2, test_tile3]
+        constructions = [test_construction1, test_construction2, test_construction3]
+        get_tiles_method.return_value = tiles
+        get_constructions_method.return_value = constructions
+
+        expected = {
+            'tiles': [model_to_dict(tile) for tile in tiles],
+            'constructions': [model_to_dict(construction) for construction in constructions]
+        }
+
+        map_resource = self.controller.get_map_resource(self.GAME_ID)
+        assert map_resource == expected
+
+    @patch("catan.logic.catan_controller.get_player_by_user_id")
+    def test_get_player_card_set(self, get_player_method):
+        get_player_method.return_value = self._get_player()
+
+        expected = model_to_dict(CardSet())
+
+        result = self.controller.get_player_card_set(self.GAME_ID, self.USER_ID)
+        assert result == expected
+
+    @patch("catan.logic.catan_controller.get_bank")
+    def test_get_bank_card_set(self, get_bank_method):
+        get_bank_method.return_value = self._get_bank()
+
+        expected = model_to_dict(CardSet(
+            lumber=BANK_RESOURCE_NUM,
+            brick=BANK_RESOURCE_NUM,
+            wool=BANK_RESOURCE_NUM,
+            grain=BANK_RESOURCE_NUM,
+            ore=BANK_RESOURCE_NUM,
+            dev_knight=BANK_RESOURCE_NUM,
+            dev_one_victory_point=BANK_RESOURCE_NUM,
+            dev_road_building=BANK_RESOURCE_NUM,
+            dev_monopoly=BANK_RESOURCE_NUM,
+            dev_year_of_plenty=BANK_RESOURCE_NUM))
+
+        result = self.controller.get_bank_card_set(self.GAME_ID)
+        assert result == expected
 
 
 
