@@ -45,7 +45,7 @@ UserId = int
 
 class CatanBaseController:
 
-    def __get_tile_type(self, type_name):
+    def __get_tile_type(self, type_name) -> Tile.RESOURCE_TYPE:
         resource_dict = {
             'lumber': Tile.LUMBER,
             'brick': Tile.BRICK,
@@ -104,11 +104,15 @@ class CatanBaseController:
         # TODO: Exception inside application: NOT NULL constraint failed: catan_robberhistory.player_id
         # robber_history.save()
         for tile in map['tiles']:
-            type_name = tile['name']
+            tile_type = self.__get_tile_type(tile['name'])
+            tile_number = 0
+            if tile_type != Tile.SEA and tile_type != Tile.DESERT:
+                tile_number = random.randint(2, 12)
+
             tile = Tile(
-                type=self.__get_tile_type(type_name),
+                type=tile_type,
                 # TODO: add number to map_template
-                number=random.randint(2, 12),
+                number=tile_number,
                 x=tile['x'],
                 y=tile['y'],
                 game=curr_game)
@@ -260,7 +264,8 @@ class CatanBaseController:
     # 返回每个银行牌数
     def get_bank_card_set(self, game_id) -> CardSetDict:
         bank = get_bank(game_id)
-        return model_to_dict(bank.card_set)
+        card_set = model_to_dict(bank.card_set)
+        return {key: value for key, value in card_set.items() if key != 'id'}
 
     # 返回当前游戏所以玩家的player_id
     # TODO 现在先返回user_id，之后统一使用user_id
@@ -270,6 +275,13 @@ class CatanBaseController:
     # 返回指定玩家的颜色
     def get_player_color(self, game_id, user_id) -> str:
         return get_player_by_user_id(game_id, user_id).color
+
+    # 改变游戏状态
+    def change_game_state(self, game_id, state: str) -> bool:
+        game = get_game(game_id)
+        game.state = state
+        game.save_all
+        return True
 
     # 返回指定玩家建造的欧几里得路径长度
     def get_player_max_road_length(self, game_id, user_id) -> int:
