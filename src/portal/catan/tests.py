@@ -263,10 +263,12 @@ class CatanControllerTests(TestCase):
         assert game_info == expected
 
     @patch("catan.logic.catan_controller.get_tiles")
+    @patch("catan.logic.catan_controller.get_game_map_name")
     @patch("catan.logic.catan_controller.get_constructions")
-    def test_get_map_resource(self, get_constructions_method, get_tiles_method):
+    def test_get_map_resource(self, get_constructions_method, get_game_map_name_method, get_tiles_method):
         player = self._get_player()
         extra_player = self._get_extra_player()
+        test_map = 'test_map'
         test_tile1 = Tile(type=Tile.GRAIN, x=random.randint(0, 5), y=random.randint(0, 5), number=random.randint(2, 12))
         test_tile2 = Tile(type=Tile.GRAIN, x=random.randint(0, 5), y=random.randint(0, 5), number=random.randint(2, 12))
         test_tile3 = Tile(type=Tile.GRAIN, x=random.randint(0, 5), y=random.randint(0, 5), number=random.randint(2, 12))
@@ -280,9 +282,11 @@ class CatanControllerTests(TestCase):
         tiles = [test_tile1, test_tile2, test_tile3]
         constructions = [test_construction1, test_construction2, test_construction3]
         get_tiles_method.return_value = tiles
+        get_game_map_name_method.return_value = test_map
         get_constructions_method.return_value = constructions
 
         expected = {
+            'map_name': test_map,
             'tiles': [model_to_dict(tile) for tile in tiles],
             'constructions': [model_to_dict(construction) for construction in constructions]
         }
@@ -294,7 +298,7 @@ class CatanControllerTests(TestCase):
     def test_get_player_card_set(self, get_player_method):
         get_player_method.return_value = self._get_player()
 
-        expected = model_to_dict(CardSet())
+        expected = {key: value for key, value in model_to_dict(CardSet()).items() if key != 'id'}
 
         result = self.controller.get_player_card_set(self.GAME_ID, self.USER_ID)
         assert result == expected
@@ -302,8 +306,7 @@ class CatanControllerTests(TestCase):
     @patch("catan.logic.catan_controller.get_bank")
     def test_get_bank_card_set(self, get_bank_method):
         get_bank_method.return_value = self._get_bank()
-
-        expected = model_to_dict(CardSet(
+        card_set_dict = model_to_dict(CardSet(
             lumber=BANK_RESOURCE_NUM,
             brick=BANK_RESOURCE_NUM,
             wool=BANK_RESOURCE_NUM,
@@ -314,6 +317,8 @@ class CatanControllerTests(TestCase):
             dev_road_building=BANK_RESOURCE_NUM,
             dev_monopoly=BANK_RESOURCE_NUM,
             dev_year_of_plenty=BANK_RESOURCE_NUM))
+
+        expected = {key: value for key, value in card_set_dict.items() if key != 'id'}
 
         result = self.controller.get_bank_card_set(self.GAME_ID)
         assert result == expected
@@ -338,6 +343,18 @@ class CatanControllerTests(TestCase):
 
         result = self.controller.get_player_color(self.GAME_ID, self.USER_ID)
         assert result == expected
+
+    @patch("catan.logic.catan_controller.Game.save_all")
+    @patch("catan.logic.catan_controller.get_game")
+    def test_change_game_state(self, get_game_method, game_save):
+        game = self._get_game()
+        get_game_method.return_value = game
+        test_state = 'END'
+
+        expected = test_state
+
+        self.controller.change_game_state(self.GAME_ID, test_state)
+        assert game.state == expected
 
 
 
