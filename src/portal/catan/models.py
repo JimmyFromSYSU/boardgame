@@ -54,6 +54,10 @@ class Bank(models.Model):
     card_set: CardSet = models.OneToOneField(CardSet, on_delete=models.CASCADE)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
 
+    def save_all(self):
+        self.card_set.save()
+        self.save()
+
 
 class HarborSea(models.Model):
     LUMBER = 'LR'
@@ -115,6 +119,9 @@ class Tile(models.Model):
     y = models.IntegerField(default=0)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
 
+    def save_all(self):
+        self.save()
+
 
 class Construction(models.Model):
     HOUSE = 'HS'
@@ -135,6 +142,10 @@ class Construction(models.Model):
     y = models.IntegerField(default=0)
     z = models.IntegerField(default=0)
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
+
+    def save_all(self):
+        self.owner.save_all()
+        self.save()
 
 
 class DiceHistory(models.Model):
@@ -183,6 +194,9 @@ class Game(models.Model):
     number_of_player = models.PositiveIntegerField(default=2)
     # TODO: rename to current_player_order
     current_player = models.IntegerField(default=0)
+
+    def save_all(self):
+        self.save()
 
     def __str__(self):
         return str({
