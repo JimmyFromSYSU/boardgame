@@ -95,7 +95,7 @@ class HarborLand(models.Model):
 class Tile(models.Model):
     LUMBER = 'LUMBER'
     BRICK = 'BRICK'
-    WOOL = 'W00L'
+    WOOL = 'WOOL'
     GRAIN = 'GRAIN'
     ORE = 'ORE'
     DESERT = 'DESERT'
@@ -185,7 +185,7 @@ class Game(models.Model):
     ]
 
     map_name = models.CharField(max_length=200)
-    state = models.CharField(max_length=200)
+    state = models.CharField(max_length=200, default="START")
     turn_id = models.IntegerField(default=0)
     status = models.CharField(
         max_length=2,

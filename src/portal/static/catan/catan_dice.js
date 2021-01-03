@@ -35,6 +35,7 @@ var catan_load_dice = function(game) {
         console.log(`PLAYER ACTION: try to roll dice ${num1 + 1} + ${num2 + 1}`)
         data = JSON.stringify({
             'action': 'ROLL_DICE',
+            'game_id': $('#gid').text(),
             'num1': num1,
             'num2': num2,
         });

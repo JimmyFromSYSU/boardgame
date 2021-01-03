@@ -11,7 +11,7 @@
             <div id="logout_button">
                 <a href="{% url 'logout' %}" class="btn btn-warning btn-lg active" role="button" aria-pressed="true">log out</a>
             </div>
-            <h2>Catan Room ({{request.user.first_name}})</h2>
+            <h2>Catan [{{room_id}}] ({{request.user.first_name}})</h2>
         </div>
         <div class="card-body">
             Online users: <div id="user_list">  </div>

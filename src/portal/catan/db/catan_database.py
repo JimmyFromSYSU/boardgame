@@ -46,6 +46,10 @@ def get_game(game_id):
     return Game.objects.get(pk=game_id)
 
 
+def get_game_map_name(game_id):
+    return Game.objects.get(pk=game_id).map_name
+
+
 def get_bank(game_id):
     return Bank.objects.get(game=game_id)
 
