@@ -270,6 +270,10 @@ class CatanBaseController:
     def get_player_color(self, game_id, user_id) -> str:
         return get_player_by_user_id(game_id, user_id).color
 
+    # 返回指定玩家建造的欧几里得路径长度
+    def get_player_max_road_length(self, game_id, user_id) -> int:
+        pass
+
     # 返回资源给银行，指定玩家得到一张随机技能卡，保存数据库。
     def trade_random_development_card(self, game_id, user_id) -> CardType:
         # return resource card
