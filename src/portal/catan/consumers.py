@@ -1,5 +1,6 @@
 import asyncio
 import json
+from typing import Dict, Any
 from django.contrib.auth import get_user_model
 from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
@@ -28,30 +29,57 @@ def obj_to_json(obj):
 
 
 class CatanConsumer(AsyncConsumer):
-    connection_counter = 0
-    game_id = None
-    user_to_player = {}
-    player_orders = {}
-
     def print_connection_counter(self):
         print(">>>>>>>>>>>>>>>>>>>>>>> INFO: connection_counter")
         print(f"connection_counter = {CatanConsumer.connection_counter}")
         print("<<<<<<<<<<<<<<<<<<<<<<<")
-
-    def print_game_id(self, game_id):
-        print(">>>>>>>>>>>>>>>>>>>>>>> INFO: game_id")
-        print(f"game_id = {game_id}")
-        print("<<<<<<<<<<<<<<<<<<<<<<<")
-
 
     def print_event(self, name, event):
         print(f">>>>>>>>>>>>>>>>>>>>>>> EVENT: {name}")
         print(event)
         print(f"<<<<<<<<<<<<<<<<<<<<<<<")
 
-
     async def get_players_data(self, game_id):
         return PLAYERS_DATA
+
+    @database_sync_to_async
+    def get_map_data(self, game_id) -> Dict[str, Any]:
+        map_data = self.controller.get_map_resource(game_id)
+        # self.print_event("map_data", obj_to_json(map_data))
+        return map_data
+
+    @database_sync_to_async
+    def get_bank_data(self, game_id) -> Dict[str, int]:
+        bank_data = self.controller.get_bank_card_set(game_id)
+        dev_card_num = sum(value for key, value in bank_data.items() if key.startswith('dev'))
+        bank_data = {
+            'bank_cards': [
+                {'name': 'brick', 'number': bank_data['brick']},
+                {'name': 'grain', 'number': bank_data['grain']},
+                {'name': 'lumber', 'number': bank_data['lumber']},
+                {'name': 'ore', 'number': bank_data['ore']},
+                {'name': 'wool', 'number': bank_data['wool']},
+                {'name': 'dcs_back', 'number': dev_card_num},
+            ],
+        }
+        self.print_event("bank_data", obj_to_json(bank_data))
+        return bank_data
+
+    @database_sync_to_async
+    def get_handcard_data(self, game_id, user_id) -> Dict[str, Any]:
+        handcard_data = self.controller.get_player_card_set(game_id, user_id)
+        handcard_data = [
+            [{'name': card_name}] * number
+            for card_name, number in handcard_data.items()
+        ]
+        # flatten list of list
+        handcard_data = [card for card_list in handcard_data for card in card_list]
+        # NOTE: sort from front end
+        self.print_event("handcard_data", obj_to_json(handcard_data))
+        return handcard_data
+
+    async def websocket_disconnect(self, event):
+        self.print_event("disconnected", event)
 
 
     async def websocket_connect(self, event):
@@ -63,49 +91,15 @@ class CatanConsumer(AsyncConsumer):
             }
         )
 
-        if CatanConsumer.connection_counter == 0:
-            map_name = "normal"
-            (game_id, user_to_player, player_orders) = init_game(map_name, {})
-            CatanConsumer.game_id = game_id
-            CatanConsumer.user_to_player = user_to_player
-            CatanConsumer.player_orders = player_orders
-        else:
-            # game_id = get_last_game_id()
-            game_id = CatanConsumer.game_id
-            user_to_player = CatanConsumer.user_to_player
-            player_orders = CatanConsumer.player_orders
+        self.game_room = None
+        self.controller = CatanBaseController()
 
-        CatanConsumer.connection_counter = CatanConsumer.connection_counter + 1
-
-        self.print_connection_counter()
-
-        self.print_game_id(game_id)
-        self.game_room = f"game_room_{game_id}"
-        await self.channel_layer.group_add(
-            self.game_room,
-            self.channel_name, # channel_name appear only when channel layer is setup
-        )
-
-        # send to all users
-        players_data = await self.get_players_data(game_id)
-        response = {
-            'action': 'INIT_GAME',
-            'game_id': game_id,
-            'players': players_data,
-        }
-
-        # # send to single user
-        # await self.send(
-        #     {
-        #         "type": "websocket.send",
-        #         "text": json.dumps(response),
-        #     }
-        # )
-        await self.channel_layer.group_send(
-            self.game_room,
+    # send to single user
+    async def send_to_single_user(self, response):
+        await self.send(
             {
-                "type": "chat_message",  # handler name
-                "text": json.dumps(response) # handler event data
+                "type": "websocket.send",
+                "text": json.dumps(response),
             }
         )
 
@@ -117,8 +111,18 @@ class CatanConsumer(AsyncConsumer):
         text = event.get('text', None)
         response = {'action': 'UNKNOWN'}
 
+
         if text:
             data = json.loads(text)
+
+            if "game_id" in data:
+                game_id = int(data["game_id"])
+                self.print_event("game_id", game_id)
+
+            if "user_id" in data:
+                user_id = int(data["user_id"])
+                self.print_event("user_id", user_id)
+
             if "action" in data:
                 if data['action'] == "BUILD_HOUSE":
                     response = {
@@ -153,19 +157,46 @@ class CatanConsumer(AsyncConsumer):
                         'num1': data['num1'],
                         'num2': data['num2'],
                     }
+                elif data['action'] == "REGISTER":
+                    # 添加到聊天室
+                    self.game_room = f"game_room_{game_id}"
+                    await self.channel_layer.group_add(
+                        self.game_room,
+                        self.channel_name, # channel_name appear only when channel layer is setup
+                    )
+                    response = {
+                        'action': 'COMFIRM_REGISTER',
+                        'game_id': game_id,
+                    }
+                elif data['action'] == "REQUEST_INIT_DATA":
+                    players_data = await self.get_players_data(game_id)
+                    map_data = await self.get_map_data(game_id)
+                    bank_data = await self.get_bank_data(game_id)
+                    handcard_data = await self.get_handcard_data(game_id, user_id)
+                    response = {
+                        'action': 'INIT_GAME',
+                        'game_id': game_id,
+                        'user_id': user_id,
+                        'map_data': map_data,
+                        'bank_data': bank_data,
+                        'players_data': players_data,
+                        # 'game_info': status/state/current_player
+                        'handcard_data': handcard_data,
+                    }
             elif "message" in data:
                 # print(f"message is: {data['message']}")
                 response = {
                     "message": f"ECHO: {data['message']}",
                 }
 
-        await self.channel_layer.group_send(
-            self.game_room,
-            {
-                "type": "chat_message",  # handler name
-                "text": json.dumps(response) # handler event data
-            }
-        )
+        if self.game_room:
+            await self.channel_layer.group_send(
+                self.game_room,
+                {
+                    "type": "chat_message",  # handler name
+                    "text": json.dumps(response) # handler event data
+                }
+            )
 
     async def chat_message(self, event):
         # print("message", event)
@@ -174,11 +205,6 @@ class CatanConsumer(AsyncConsumer):
             "text": event["text"]
         })
 
-
-    async def websocket_disconnect(self, event):
-        CatanConsumer.connection_counter = CatanConsumer.connection_counter - 1
-        self.print_event("disconnected", event)
-        self.print_connection_counter()
 
 
 

@@ -25,6 +25,7 @@ from ..db.catan_database import get_tiles
 from ..db.catan_database import count_houses_by_user_id
 from ..db.catan_database import count_towns_by_user_id
 from ..db.catan_database import get_game
+from ..db.catan_database import get_game_map_name
 from ..db.catan_database import get_bank
 CardSetDict = Dict[str, int]
 # CardType could be [
@@ -238,11 +239,14 @@ class CatanBaseController:
         }
 
     # 返回地图资源, 包括Tiles, Constructions, (Current Robber).
-    def get_map_resource(self, game_id) -> List[Dict[str, Any]]:
+    def get_map_resource(self, game_id) -> Dict[str, Any]:
         tiles = get_tiles(game_id)
+        map_name = get_game_map_name(game_id)
         constructions = get_constructions(game_id)
 
-        map_resource = {'tiles': [model_to_dict(tile) for tile in tiles],
+        map_resource = {
+                        'map_name': map_name,
+                        'tiles': [model_to_dict(tile) for tile in tiles],
                         'constructions': [model_to_dict(construction) for construction in constructions]}
 
         return map_resource
@@ -250,7 +254,8 @@ class CatanBaseController:
     # 返回每个玩家手牌
     def get_player_card_set(self, game_id, user_id) -> CardSetDict:
         player = get_player_by_user_id(game_id, user_id)
-        return model_to_dict(player.card_set)
+        card_set = model_to_dict(player.card_set)
+        return {key: value for key, value in card_set.items() if key != 'id'}
 
     # 返回每个银行牌数
     def get_bank_card_set(self, game_id) -> CardSetDict:

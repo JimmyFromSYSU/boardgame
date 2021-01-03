@@ -1,3 +1,7 @@
+load_bank_data_to_game = function(bank_data, game) {
+    game.info.bank_cards = bank_data['bank_cards']
+}
+
 var catan_load_info = function(game) {
     info_sprites = {
         'resource_card': 'card_back',
@@ -8,14 +12,14 @@ var catan_load_info = function(game) {
     };
     game.info = {
         resource_card_max_number: 19,
-        development_card_max_number: 25,
+        development_card_max_number: 95,
         bank_cards: [
             {'name': 'lumber', number: 19},
             {'name': 'brick', number: 19},
             {'name': 'wool', number: 19},
             {'name': 'grain', number: 19},
             {'name': 'ore', number: 19},
-            {'name': 'dcs_back', number: 25},
+            {'name': 'dcs_back', number: 95},
         ],
     };
 

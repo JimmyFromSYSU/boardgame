@@ -20,27 +20,27 @@ var CatanGame = {
             game.player = players[0]
         }
 
-
         /***********************************\
 		 * 地图设置
+         * TODO: remove this part and
+         * calculate tile size after
+         * fetch tiles data.
         \***********************************/
-        game.load_map_config = function(map) {
+        game.load_map_config = function(map_name) {
+            map = catan_maps[map_name]
             game.board.tiles = map.tiles
             game.board.row = map.row
             game.board.col = map.col
             game.board.robber = map.robber
         }
-        // catan_maps.normal
-        // catan_maps.fertile_land
-        // catan_maps.inland_sea
-        game.load_map_config(catan_maps.fertile_land);
+        game.load_map_config($('#map_name').text());
 
 
         /***********************************\
 		 * 设置所有的tile
 		\***********************************/
         // 计算tile的id到tile的mapping
-        game.board.id_to_tile = {};
+
         game.get_tile_id = function(location) {
             return location.x + location.y * game.board.col;
         };
@@ -48,12 +48,6 @@ var CatanGame = {
             const id = game.get_tile_id(location);
             return game.board.id_to_tile[id];
         };
-        game.board.tiles.forEach(tile => {
-            var tid = game.get_tile_id(
-                {'x': tile.x, 'y': tile.y}
-            );
-            game.board.id_to_tile[tid] = tile;
-        });
 
         // 回取每个资源格中数字的颜色
         function get_tile_number_color(number){
@@ -143,7 +137,7 @@ var CatanGame = {
             const x = tl.x;
             const y = tl.y;
 
-            tile.e = Crafty.e("2D, Canvas, tile_" + tile.name).attr({
+            tile.e = Crafty.e("2D, Canvas, tile_" + tile.type.toLowerCase()).attr({
                 x: x,
                 y: y,
                 z: 1,
@@ -151,7 +145,7 @@ var CatanGame = {
                 h: tile_h,
             });
 
-            if (tile.num) {
+            if (tile.number) {
                 const text_height = tile_h / 4;
                 tile.num_e = Crafty.e("2D, DOM, Text").attr({
                     x: x,
@@ -160,9 +154,9 @@ var CatanGame = {
                     w: tile_w,
                     h: text_height,
                 })
-                .text(tile.num)
+                .text(tile.number)
                 .css({ "text-align": "center" })
-                .textColor(get_tile_number_color(tile.num))
+                .textColor(get_tile_number_color(tile.number))
                 .textFont({family: 'Arial', size: `${text_height}px`, weight: 'bold'});
 
                 const center = game.get_tile_center({x: tile.x, y: tile.y})
@@ -193,7 +187,7 @@ var CatanGame = {
             }
 
             // 填充陆地中tile之间的空隙。
-            if (tile.name !== 'sea') {
+            if (tile.type !== 'SEA') {
                 Crafty.e("2D, Canvas, tile_land").attr({
                     x: x - tile_w / 100,
                     y: y,
@@ -213,7 +207,7 @@ var CatanGame = {
         game.has_land = function(tiles) {
             var is_valid = false;
             tiles.forEach(tile => {
-                if (tile.name != 'sea') {
+                if (tile.type != 'SEA') {
                     is_valid = true;
                 }
             });
@@ -257,6 +251,7 @@ var CatanGame = {
                         console.log("PLAYER ACTION: try to add a town");
                         data = JSON.stringify({
                             'action': 'BUILD_TOWN',
+                            'game_id': $('#gid').text(),
                             'x': point.x,
                             'y': point.y,
                             'z': point.z,
@@ -271,6 +266,7 @@ var CatanGame = {
                     console.log("PLAYER ACTION: try to add a house");
                     data = JSON.stringify({
                         'action': 'BUILD_HOUSE',
+                        'game_id': $('#gid').text(),
                         'x': point.x,
                         'y': point.y,
                         'z': point.z,
@@ -293,6 +289,7 @@ var CatanGame = {
                     console.log("PLAYER ACTION: add a road");
                     data = JSON.stringify({
                         'action': 'BUILD_ROAD',
+                        'game_id': $('#gid').text(),
                         'x': edge.x,
                         'y': edge.y,
                         'z': edge.z,
@@ -305,9 +302,13 @@ var CatanGame = {
         // 添加tile上的点击函数
         game.set_click_tile_obj = function(e, tile) {
             e.bind('Click', function(MouseEvent){
+                if (game.can_move_robber() == false) {
+                    return;
+                }
                 console.log("PLAYER ACTION: move the robber");
                 data = JSON.stringify({
                     'action': 'MOVE_ROBBER',
+                    'game_id': $('#gid').text(),
                     'x': tile.x,
                     'y': tile.y,
                 });
@@ -384,7 +385,7 @@ var CatanGame = {
                 const center = game.get_tile_center({x: tile.x, y: tile.y})
                 const w = tile_h / 4 * 1.8;
                 const h = tile_h / 4 * 1.8;
-                if(tile.name != 'sea') {
+                if(tile.type != 'SEA') {
                     var touch_area = Crafty.e(`2D, DOM, Mouse, obj_touch_area`).attr({
                         x: center.x - w/2,
                         y: center.y - h/2,
@@ -426,7 +427,7 @@ var CatanGame = {
                 if(pre_tile) { // robber 已经在某个tile上，非初始化放置robber
                     pre_tile.robber_e = null;
                     if (pre_tile.num_e) {
-                        pre_tile.num_e.textColor(get_tile_number_color(pre_tile.num));
+                        pre_tile.num_e.textColor(get_tile_number_color(pre_tile.number));
                     }
                     if (pre_tile.num_bg_e) {
                         pre_tile.num_bg_e.visible = true
@@ -464,8 +465,9 @@ var CatanGame = {
         /***********************************\
 		 * 加载所有的牌
         \***********************************/
-        game.board.cards = TEST_FULL_CARD_SET;
+        // game.board.cards = TEST_FULL_CARD_SET;
         game.card_compare = function(a, b) {
+            // TODO: add dev cards
             const v = {
                 'lumber': 0,
                 'brick': 1,
@@ -473,9 +475,11 @@ var CatanGame = {
                 'grain': 3,
                 'ore': 4,
             };
-            return v[a.name] - v[b.name];
+            a_v = v[a.name]
+            b_v = v[b.name]
+            return a_v - b_v;
         };
-        game.board.cards.sort(game.card_compare);
+
         game.get_selected_cards = function () {
             var select_cards = [];
             game.board.cards.forEach(card => {
@@ -606,13 +610,18 @@ var CatanGame = {
         game = catan_load_info(game)
 
         /***********************************\
+		 * 加载所有state相关内容
+        \***********************************/
+        game = catan_load_state(game)
+
+        /***********************************\
 		 * 开始运行游戏
 		\***********************************/
         // 加载主场景
         game.load_main_scene = function() {
-            game.load_map()
-            game.load_cards()
-            game.load_main_button()
+            // game.load_map()
+            // game.load_cards()
+            // game.load_main_button()
             // game.load_info()
             game.socket = CatanWebSocket.createNew(game)
         }

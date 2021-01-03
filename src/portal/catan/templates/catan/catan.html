@@ -4,6 +4,7 @@
 {% block content %}
 <div id="uid" class="d-none">{{request.user.id}}</div>
 <div id="gid" class="d-none">{{game_id}}</div>
+<div id="map_name" class="d-none">{{map_name}}</div>
 <div id="catan_game"></div>
 {% endblock %}
 
@@ -15,6 +16,7 @@
 
 <script src="{% static 'catan/catan_maps.js' %}"></script>
 <script src="{% static 'catan/catan_assets.js' %}"></script>
+<script src="{% static 'catan/catan_state.js' %}"></script>
 <script src="{% static 'catan/catan_cards.js' %}"></script>
 <script src="{% static 'catan/catan_loading.js' %}"></script>
 
