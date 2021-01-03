@@ -1,0 +1,17 @@
+{%extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div id="minesweeper_game">hello</div>
+{% endblock %}
+
+
+{% block js %}
+<script src="{% static 'classic/minesweeper.js' %}"></script>
+
+{% endblock %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'classic/minesweeper.css' %}">
+{% endblock %}

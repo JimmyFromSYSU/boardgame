@@ -3,14 +3,19 @@ from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-class CatanView(View):
+class CatanView(LoginRequiredMixin, View):
     def get(self, request):
-        if 'room_id' in request.GET:
-            room_id = request.GET['room_id']
+        if 'game_id' in request.GET:
+            game_id = request.GET['game_id']
         else:
             # TODO: go to room list page
-            room_id = 0
-        return render(request, 'catan/catan.html', context={'title': 'Catan', 'room_id': room_id,})
+            game_id = 0
+
+        return render(
+            request,
+            'catan/catan.html',
+            context={'title': 'Catan', 'game_id': game_id,}
+        )
 
 
 class CatanRoomView(LoginRequiredMixin, View):

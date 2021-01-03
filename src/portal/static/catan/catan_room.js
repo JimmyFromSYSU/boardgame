@@ -28,7 +28,8 @@ var CatanRoomWebSocket = {
                 vm.setMap(data.map_name)
             } else if (data.action == "COMFIRM_START_GAME") {
                 const room_id = $('#rid').text()
-                window.location.href = "/catan/?room_id=" + room_id;
+                const game_id = data.game_id
+                window.location.href = "/catan/?game_id=" + game_id
             }
         }
 
