@@ -18,7 +18,7 @@ var catan_load_build = function(game) {
         const rotation = (loc.z == 0 ? 90 : 30 * loc.z);
         const w = game.sizes.tile_h/2
         const h = game.sizes.tile_h/4
-        edge.e = Crafty.e(`2D, DOM, obj_road`).attr({
+        edge.e = Crafty.e(`2D, DOM, obj_${game.player.color}_road`).attr({
             x: center.x - w/2,
             y: center.y - h/2,
             z: 3,
@@ -53,7 +53,7 @@ var catan_load_build = function(game) {
         const center = game.get_point_center(point)
         const w = game.sizes.tile_h / 4
         const h = game.sizes.tile_h / 4
-        point.e = Crafty.e(`2D, DOM, obj_house`).attr({
+        point.e = Crafty.e(`2D, DOM, obj_${game.player.color}_house`).attr({
             x: center.x - w/2,
             y: center.y - h/2,
             z: 4,
@@ -82,7 +82,7 @@ var catan_load_build = function(game) {
         const h = game.sizes.tile_h / 4
         var house_e = point.e
         point.name = 'town'
-        point.e = Crafty.e(`2D, DOM, obj_town`).attr({
+        point.e = Crafty.e(`2D, DOM, obj_${game.player.color}_town`).attr({
             x: center.x - w * 3 / 4,
             y: center.y - h * 3 / 4,
             z: 5,

@@ -7,6 +7,10 @@ var CatanGame = {
     ) {
         var game = {};
         game.board = {};
+
+        game.id = $('#gid').text()
+        game.user_id = $('#uid').text()
+
         game.is_initialized = false;
         game.click_volume = 0.1
         /***********************************\
@@ -17,7 +21,10 @@ var CatanGame = {
         game.players = []
         game.init_player_action = function(players) {
             game.players = players
+
             game.player = players[0]
+            game.player = players.find(p => p.id.toString() == game.user_id.toString());
+            // console.log(game.player)
         }
 
         /***********************************\
@@ -249,14 +256,16 @@ var CatanGame = {
                     // 已有house，升级成town
                     if (point.name == 'house') {
                         console.log("PLAYER ACTION: try to add a town");
-                        data = JSON.stringify({
-                            'action': 'BUILD_TOWN',
-                            'game_id': $('#gid').text(),
-                            'x': point.x,
-                            'y': point.y,
-                            'z': point.z,
-                        });
-                        game.socket.send(data);
+                        if(game.can_build_town()) {
+                            data = JSON.stringify({
+                                'action': 'BUILD_TOWN',
+                                'game_id': game.id,
+                                'x': point.x,
+                                'y': point.y,
+                                'z': point.z,
+                            });
+                            game.socket.send(data);
+                        }
                     // 已经是town
                     } else {
                         e.unbind('Click');
@@ -264,14 +273,16 @@ var CatanGame = {
                 } else {
                     // 未有house和town
                     console.log("PLAYER ACTION: try to add a house");
-                    data = JSON.stringify({
-                        'action': 'BUILD_HOUSE',
-                        'game_id': $('#gid').text(),
-                        'x': point.x,
-                        'y': point.y,
-                        'z': point.z,
-                    });
-                    game.socket.send(data);
+                    if(game.can_build_house()) {
+                        data = JSON.stringify({
+                            'action': 'BUILD_HOUSE',
+                            'game_id': game.id,
+                            'x': point.x,
+                            'y': point.y,
+                            'z': point.z,
+                        });
+                        game.socket.send(data);
+                    }
                 }
             })
         }
@@ -287,14 +298,16 @@ var CatanGame = {
                 } else {
                     // 未有road
                     console.log("PLAYER ACTION: add a road");
-                    data = JSON.stringify({
-                        'action': 'BUILD_ROAD',
-                        'game_id': $('#gid').text(),
-                        'x': edge.x,
-                        'y': edge.y,
-                        'z': edge.z,
-                    });
-                    game.socket.send(data);
+                    if(game.can_build_road()) {
+                        data = JSON.stringify({
+                            'action': 'BUILD_ROAD',
+                            'game_id': game.id,
+                            'x': edge.x,
+                            'y': edge.y,
+                            'z': edge.z,
+                        });
+                        game.socket.send(data);
+                    }
                 }
             })
         }
@@ -308,7 +321,7 @@ var CatanGame = {
                 console.log("PLAYER ACTION: move the robber");
                 data = JSON.stringify({
                     'action': 'MOVE_ROBBER',
-                    'game_id': $('#gid').text(),
+                    'game_id': game.id,
                     'x': tile.x,
                     'y': tile.y,
                 });
@@ -328,7 +341,7 @@ var CatanGame = {
                     const w = tile_h / 4;
                     const h = tile_h / 4;
                     if (game.is_land_point({x: tile.x, y: tile.y, z: config.z})) {
-                        var touch_area = Crafty.e(`2D, DOM, Mouse, obj_touch_area`).attr({
+                        var touch_area = Crafty.e(`2D, DOM, Mouse, obj_${game.player.color}_touch_area`).attr({
                             x: center.x - w/2,
                             y: center.y - h/2,
                             center_x: center.x,
@@ -362,7 +375,7 @@ var CatanGame = {
                     const h = tile_h / 4;
                     const rotation = (config.z == 0 ? 90 : 30 * config.z);
                     if (game.is_land_edge({x: tile.x, y: tile.y, z: config.z})) {
-                        var touch_area = Crafty.e(`2D, DOM, Mouse, obj_edge_touch_area`).attr({
+                        var touch_area = Crafty.e(`2D, DOM, Mouse, obj_${game.player.color}_edge_touch_area`).attr({
                             x: center.x - w/2,
                             y: center.y - h/2,
                             center_x: center.x,
@@ -386,7 +399,7 @@ var CatanGame = {
                 const w = tile_h / 4 * 1.8;
                 const h = tile_h / 4 * 1.8;
                 if(tile.type != 'SEA') {
-                    var touch_area = Crafty.e(`2D, DOM, Mouse, obj_touch_area`).attr({
+                    var touch_area = Crafty.e(`2D, DOM, Mouse, obj_${game.player.color}_touch_area`).attr({
                         x: center.x - w/2,
                         y: center.y - h/2,
                         center_x: center.x,
@@ -645,6 +658,13 @@ var CatanGame = {
         return game;
     }
 };
+
+
+load_game_data_to_game = function(game_data, game) {
+    game.status = game_data.status
+    game.state = game_data.state
+    game.current_player_id = game_data.current_player_id
+}
 
 
 window.onload = function()

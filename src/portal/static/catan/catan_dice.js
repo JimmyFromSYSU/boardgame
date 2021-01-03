@@ -35,7 +35,7 @@ var catan_load_dice = function(game) {
         console.log(`PLAYER ACTION: try to roll dice ${num1 + 1} + ${num2 + 1}`)
         data = JSON.stringify({
             'action': 'ROLL_DICE',
-            'game_id': $('#gid').text(),
+            'game_id': game.id,
             'num1': num1,
             'num2': num2,
         });
@@ -58,7 +58,9 @@ var catan_load_dice = function(game) {
             w: dice_w,
             h: dice_h,
         }).bind('MouseUp', function(MouseEvent){
-            game.send_roll_dice_request()
+            if (game.can_roll_dice()) {
+                game.send_roll_dice_request()
+            }
         })
 
         // 骰子
@@ -70,7 +72,9 @@ var catan_load_dice = function(game) {
             w: dice_w,
             h: dice_h,
         }).bind('MouseUp', function(MouseEvent){
-            game.send_roll_dice_request()
+            if (game.can_roll_dice()) {
+                game.send_roll_dice_request()
+            }
         })
     }
 

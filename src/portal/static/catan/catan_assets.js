@@ -101,50 +101,63 @@ var assets = {
         ///////////////////
         // tiles
         //////////////////
-        "/static/images/catan/map/brick.png": {
+        "/static/images/catan/map/resource/brick.png": {
             "tile": 500, "tileh": 575, "map": { "tile_brick": [0,0]},
         },
-        "/static/images/catan/map/wool.png": {
+        "/static/images/catan/map/resource/wool.png": {
             "tile": 500, "tileh": 575, "map": { "tile_wool": [0,0]},
         },
-        "/static/images/catan/map/ore.png": {
+        "/static/images/catan/map/resource/ore.png": {
             "tile": 500, "tileh": 575, "map": { "tile_ore": [0,0]},
         },
-        "/static/images/catan/map/lumber.png": {
+        "/static/images/catan/map/resource/lumber.png": {
             "tile": 500, "tileh": 575, "map": { "tile_lumber": [0,0]},
         },
-        "/static/images/catan/map/grain.png": {
+        "/static/images/catan/map/resource/grain.png": {
             "tile": 500, "tileh": 575, "map": { "tile_grain": [0,0]},
         },
-        "/static/images/catan/map/desert.png": {
+        "/static/images/catan/map/resource/desert.png": {
             "tile": 500, "tileh": 575, "map": { "tile_desert": [0,0]},
         },
-        "/static/images/catan/map/sea.png": {
+        "/static/images/catan/map/resource/sea.png": {
             "tile": 500, "tileh": 575, "map": { "tile_sea": [0,0]},
         },
-        "/static/images/catan/map/land.png": {
+        "/static/images/catan/map/resource/land.png": {
             "tile": 500, "tileh": 575, "map": { "tile_land": [0,0]},
         },
 
         ///////////////////
         // objs
         //////////////////
-        "/static/images/catan/map/touch_area.png": {
-            "tile": 120, "tileh": 120, "map": { "obj_touch_area": [0,0]},
-        },
-        "/static/images/catan/map/edge_touch_area.png": {
-            "tile": 120, "tileh": 120, "map": { "obj_edge_touch_area": [0,0]},
+        // TODO: only load color used
+        "/static/images/catan/map/color/red/touch_area.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_red_touch_area": [0,0]},
         },
         // house/town/road https://www.thingiverse.com/thing:3214671
-        "/static/images/catan/map/house.png": {
-            "tile": 120, "tileh": 120, "map": { "obj_house": [0,0]},
+        "/static/images/catan/map/color/red/house.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_red_house": [0,0]},
         },
-        "/static/images/catan/map/town.png": {
-            "tile": 120, "tileh": 120, "map": { "obj_town": [0,0]},
+        "/static/images/catan/map/color/red/town.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_red_town": [0,0]},
         },
-        "/static/images/catan/map/road.png": {
-            "tile": 120, "tileh": 120, "map": { "obj_road": [0,0]},
+        "/static/images/catan/map/color/red/road.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_red_road": [0,0], "obj_red_edge_touch_area": [0,0]},
         },
+
+        "/static/images/catan/map/color/blue/touch_area.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_blue_touch_area": [0,0]},
+        },
+        // house/town/road https://www.thingiverse.com/thing:3214671
+        "/static/images/catan/map/color/blue/house.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_blue_house": [0,0]},
+        },
+        "/static/images/catan/map/color/blue/town.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_blue_town": [0,0]},
+        },
+        "/static/images/catan/map/color/blue/road.png": {
+            "tile": 120, "tileh": 120, "map": { "obj_blue_road": [0,0], "obj_blue_edge_touch_area": [0,0]},
+        },
+
         // https://www.tinkercad.com/things/9ZFl9amBXaA-settlers-of-catan-robber
         "/static/images/catan/map/robber.png": {
             "tile": 120, "tileh": 120, "map": { "obj_robber": [0,0]},

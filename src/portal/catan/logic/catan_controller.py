@@ -229,7 +229,7 @@ class CatanBaseController:
         number_of_player = game.number_of_player
         status = game.status
         state = game.state
-        current_player_id = game.current_player
+        current_player_id = player = get_player_by_order(game.id, game.current_player).user_id
         return {
             'turn_id': turn_id,
             'number_of_player': number_of_player,
@@ -263,8 +263,9 @@ class CatanBaseController:
         return model_to_dict(bank.card_set)
 
     # 返回当前游戏所以玩家的player_id
+    # TODO 现在先返回user_id，之后统一使用user_id
     def get_player_id_list(self, game_id) -> List[int]:
-        return [player.id for player in get_players(game_id)]
+        return [player.user_id for player in get_players(game_id)]
 
     # 返回指定玩家的颜色
     def get_player_color(self, game_id, user_id) -> str:

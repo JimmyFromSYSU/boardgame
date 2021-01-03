@@ -5,15 +5,19 @@ var catan_load_state = function(game) {
     }
 
     game.can_build_road = function() {
-        return false
+        return true
     }
 
     game.can_build_house = function() {
+        console.log(`state: ${game.state}, curr_player:${game.current_player_id} user_id: ${game.user_id}`)
+        if (game.state == 'START' && game.current_player_id.toString() == game.user_id) {
+            return true
+        }
         return false
     }
 
     game.can_build_town = function() {
-        return false
+        return game.can_build_house()
     }
 
     game.can_roll_dice = function() {
@@ -21,15 +25,20 @@ var catan_load_state = function(game) {
     }
 
     game.should_show_text = function() {
-        return "结束回合？"
+        // return "结束回合？"
+        return "请放置一所房子"
     }
 
     game.should_show_yes_button = function() {
-        return true
+        return false
     }
 
     game.should_show_no_button = function() {
-        return true
+        return false
+    }
+
+    game.update_ui = function() {
+
     }
 
     return game

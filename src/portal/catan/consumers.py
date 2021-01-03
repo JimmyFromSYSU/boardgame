@@ -15,7 +15,7 @@ from .data_layer.api import (
 )
 from .logic.catan_controller import CatanBaseController
 
-from .data_layer.players_data import PLAYERS_DATA
+# from .data_layer.players_data import PLAYERS_DATA
 from django.contrib.auth.models import User
 
 
@@ -39,14 +39,50 @@ class CatanConsumer(AsyncConsumer):
         print(event)
         print(f"<<<<<<<<<<<<<<<<<<<<<<<")
 
-    async def get_players_data(self, game_id):
-        return PLAYERS_DATA
+    @database_sync_to_async
+    def get_players_data(self, game_id):
+        PLAYERS_DATA = {
+            '1': {
+                'name': '智',
+                'sprite': 'player_id_1', # TODO: migrate to image path
+            },
+            '3': {
+                'name': '今',
+                'sprite': 'player_id_3',
+            },
+        }
+        pid_list = self.controller.get_player_id_list(game_id)
+        players_data = [
+            {
+                'name': PLAYERS_DATA[str(pid)]['name'],
+                'id': pid,
+                'sprite': PLAYERS_DATA[str(pid)]['sprite'],
+                'color': self.controller.get_player_color(game_id, pid),
+                'info': {
+                    'resource_card': 0,
+                    'development_card': 0,
+                    'score': 0,
+                    'knight': 0,
+                    'road': 0,
+                },
+            }
+            for pid in pid_list
+        ]
+        self.print_event("players_data", obj_to_json(players_data))
+        return players_data
 
     @database_sync_to_async
     def get_map_data(self, game_id) -> Dict[str, Any]:
         map_data = self.controller.get_map_resource(game_id)
         # self.print_event("map_data", obj_to_json(map_data))
         return map_data
+
+    @database_sync_to_async
+    def get_game_data(self, game_id) -> Dict[str, Any]:
+        game_data = self.controller.get_game_info(game_id)
+        self.print_event("game_data", obj_to_json(game_data))
+        return game_data
+
 
     @database_sync_to_async
     def get_bank_data(self, game_id) -> Dict[str, int]:
@@ -62,7 +98,7 @@ class CatanConsumer(AsyncConsumer):
                 {'name': 'dcs_back', 'number': dev_card_num},
             ],
         }
-        self.print_event("bank_data", obj_to_json(bank_data))
+        # self.print_event("bank_data", obj_to_json(bank_data))
         return bank_data
 
     @database_sync_to_async
@@ -168,11 +204,14 @@ class CatanConsumer(AsyncConsumer):
                         'action': 'COMFIRM_REGISTER',
                         'game_id': game_id,
                     }
+                # 第一次加载页面，游戏中途断线重连也会进行初始化
                 elif data['action'] == "REQUEST_INIT_DATA":
                     players_data = await self.get_players_data(game_id)
                     map_data = await self.get_map_data(game_id)
                     bank_data = await self.get_bank_data(game_id)
                     handcard_data = await self.get_handcard_data(game_id, user_id)
+                    game_data = await self.get_game_data(game_id)
+
                     response = {
                         'action': 'INIT_GAME',
                         'game_id': game_id,
@@ -180,7 +219,8 @@ class CatanConsumer(AsyncConsumer):
                         'map_data': map_data,
                         'bank_data': bank_data,
                         'players_data': players_data,
-                        # 'game_info': status/state/current_player
+                        # status/state/current_player
+                        'game_data': game_data,
                         'handcard_data': handcard_data,
                     }
             elif "message" in data:

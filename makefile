@@ -50,5 +50,5 @@ test:
 # pw?: 12345678-Gu
 
 
-# http://127.0.0.1:5001/catan/room/?room_id=6
-# http://127.0.0.1:5001/catan/?game_id=8
+# http://127.0.0.1:5001/catan/room/?room_id=7
+# http://127.0.0.1:5001/catan/?game_id=9

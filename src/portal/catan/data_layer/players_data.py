@@ -5,7 +5,7 @@ PLAYERS_DATA = [
         'id': 1,
         'sprite': 'player_id_1', # TODO: migrate to image path
         # from catan table
-        'color': 'red',
+        'color': 'blue',
         'info': {
             'resource_card': 0,
             'development_card': 0,
@@ -18,7 +18,7 @@ PLAYERS_DATA = [
         'name': '今',
         'id': 3,
         'sprite': 'player_id_3',
-        'color': 'blue',
+        'color': 'red',
         'info': {
             'resource_card': 0,
             'development_card': 0,
