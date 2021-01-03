@@ -15,8 +15,8 @@ application = ProtocolTypeRouter({
         AuthMiddlewareStack(
             URLRouter(
                 [
-                    url(r'^catan/$', CatanConsumer),
-                    url(r'^catan/room/$', CatanRoomConsumer),
+                    url(r'^catan/$', CatanConsumer.as_asgi()),
+                    url(r'^catan/room/$', CatanRoomConsumer.as_asgi()),
                 ]
             )
         )

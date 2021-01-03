@@ -10,11 +10,15 @@ server:
 	# brew services start redis
 	# lsof -i:5001
 	# kill -9 PID
+	# python3 -m pip install channels
 	# # Delete all files in migrations folder
 	# # Delete all rows in portal/db.sqlite3 -> django_migrations
 	# python src/portal/manage.py makemigrations catan
 	# python src/portal/manage.py migrate catan --database=catan
 	python src/portal/manage.py runserver 0.0.0.0:5001
+
+	# More
+	# Upgrading SQLite on CentOS: https://www.webdesignsun.com/tech-blog/upgrading-sqlite-on-centos
 
 readme:
 	python3 ../latex/create_book.py --path README.md --name 桌游类小游戏开发框架 --author "南方小智，Michael Gu" --output wiki

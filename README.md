@@ -34,10 +34,19 @@ python3 -m pip install pytest-mock
 
 
 # install redis
+```
 brew install redis
 
+# for centos
+yum install redis
+```
+
 # start redis
+```
 brew services start redis
+# for centos
+systemctl start redis
+```
 
 # test redis
 redis-cli ping
