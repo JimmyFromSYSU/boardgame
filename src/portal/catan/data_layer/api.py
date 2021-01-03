@@ -134,7 +134,7 @@ def get_selected_map(room_id):
         return DEFAULT_MAP
 
 
-def get_users(room_id):
+def get_users_config(room_id):
     room_id = str(room_id)
     return Room[room_id]['users']
 

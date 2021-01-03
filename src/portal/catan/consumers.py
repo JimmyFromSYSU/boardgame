@@ -10,11 +10,11 @@ from .data_layer.api import (
     get_room_data,
     set_selected_map,
     get_selected_map,
-    get_users,
+    get_users_config,
 )
 from .logic.catan_controller import CatanBaseController
 
-from .data_layer.player_data import PLAYERS_DATA
+from .data_layer.players_data import PLAYERS_DATA
 from django.contrib.auth.models import User
 
 
@@ -49,6 +49,11 @@ class CatanConsumer(AsyncConsumer):
         print(event)
         print(f"<<<<<<<<<<<<<<<<<<<<<<<")
 
+
+    async def get_players_data(self, game_id):
+        return PLAYERS_DATA
+
+
     async def websocket_connect(self, event):
         self.print_event("connected", event)
 
@@ -81,27 +86,21 @@ class CatanConsumer(AsyncConsumer):
             self.channel_name, # channel_name appear only when channel layer is setup
         )
 
+        # send to all users
+        players_data = await self.get_players_data(game_id)
+        response = {
+            'action': 'INIT_GAME',
+            'game_id': game_id,
+            'players': players_data,
+        }
+
         # # send to single user
-        # response = {
-        #     'action': 'INIT_INFO',
-        #     'game_id': game_id,
-        #     # 'number_of_players': len()
-        #     # 'players': PLAYERS_DATA,
-        # }
         # await self.send(
         #     {
         #         "type": "websocket.send",
         #         "text": json.dumps(response),
         #     }
         # )
-
-        # send to all users
-        response = {
-            'action': 'INIT_GAME',
-            'game_id': game_id,
-            'players': PLAYERS_DATA,
-        }
-
         await self.channel_layer.group_send(
             self.game_room,
             {
@@ -206,21 +205,17 @@ class CatanRoomConsumer(AsyncConsumer):
             }
         )
 
-    # @database_sync_to_async
-    # def get_users(self, user_ids):
-    #     users = [User.objects.get(id=user_id) for user_id in user_ids]
-    #     return users
-
     @database_sync_to_async
     def create_game(self, room_id):
         controller = CatanBaseController()
         map_name = get_selected_map(room_id)
-        users = get_users(room_id)
-        user_colors = {int(_id): user['color'] for _id, user in users.items()}
+        users_config = get_users_config(room_id)
+        user_colors = {int(_id): user_config['color'] for _id, user_config in users_config.items()}
         self.print_event("input map_name", map_name)
         self.print_event("input user_colors", obj_to_json(user_colors))
         user_info = controller.initial_game(map_name, user_colors)
         self.print_event("return user info", obj_to_json(user_info))
+        return user_info['game_id']
 
     async def websocket_receive(self, event):
         # TODO: Before the state machine, add a lock to protect the states.
@@ -237,7 +232,6 @@ class CatanRoomConsumer(AsyncConsumer):
             if request['action'] == "ADD_USER":
                 update_user(user_id, room_id)
                 users = await get_users_in_room(room_id)
-                # users = await self.get_users(user_ids)
                 users_info = [
                     {
                         'id': user.id,
@@ -269,8 +263,8 @@ class CatanRoomConsumer(AsyncConsumer):
                 self.print_event("CHANGE_COLOR", "CHANGE_COLOR")
             elif request['action'] == "START_GAME":
                 self.print_event("START_GAME", "START_GAME")
-                await self.create_game(room_id)
-                response = {'action': 'COMFIRM_START_GAME'}
+                game_id = await self.create_game(room_id)
+                response = {'action': 'COMFIRM_START_GAME', 'game_id': game_id}
 
         # NOTE: print room_data for debug
         room_data = get_room_data()

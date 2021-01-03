@@ -82,6 +82,7 @@ var assets = {
                 "avatar6": [1,1],
             }
         },
+        // TODO: only load image for users in the game.
         "/static/images/user/0.png": {
             "tile": 225, "tileh": 225, "map": { "player_id_0": [0,0]},
         },
