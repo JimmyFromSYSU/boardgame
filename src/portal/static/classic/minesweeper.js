@@ -112,7 +112,7 @@ var MinesweeperGame = {
             game.hit_mine = 0
             game.max_hit_mine = 3
             game.pct_of_mine = 0.1 + (Math.random() / 10)
-            console.log(`game.pct_of_mine = ${Math.random()}`)
+            console.log(`game.pct_of_mine = ${game.pct_of_mine}`)
             // game.col = 50
             // game.tile_len =  Math.floor((game.screen_w - game.padding_left - game.padding_right) / game.col)
             // game.row = Math.floor((game.screen_h - game.padding_top - game.padding_bottom) / game.tile_len)
@@ -140,7 +140,7 @@ var MinesweeperGame = {
             for (var r = 0; r < game.row; r = r + 1) {
                 for (var c = 0; c < game.col; c = c + 1) {
                     tile = game.grids[r][c]
-                    if(tile.is_mine && tile.is_cover) {
+                    if(tile.is_mine && tile.is_covered) {
                         tiles.push(tile)
                     }
                 }
@@ -224,19 +224,23 @@ var MinesweeperGame = {
         game.show_tile = function(tile) {
             tile.cover_e.alpha = 0
             tile.land_e.alpha = 1
-            tile.cover_e.unbind('MouseOut').unbind('MouseOver').unbind('Click').unbind('MouseUp')
-            tile.is_cover = false
+            // keep click for showing flag for neighbor
+            // .unbind('Click')
+            tile.cover_e.unbind('MouseOut').unbind('MouseOver').unbind('MouseUp')
+            tile.is_covered = false
             game.remove_flag(tile, silent=true)
             game.show_number(tile)
         }
 
-        game.get_neighbor_tiles = function(tile) {
+        game.get_neighbor_tiles = function(tile, is_covered=true) {
             var tiles = []
             for (var i = 0; i < neighbor.length; i = i + 1) {
                 const new_r = tile.r + neighbor[i].dr
                 const new_c = tile.c + neighbor[i].dc
                 if (game.in_grids(new_r, new_c)) {
-                    tiles.push(game.grids[new_r][new_c])
+                    t = game.grids[new_r][new_c]
+                    if (t.is_covered == is_covered)
+                        tiles.push(t)
                 }
             }
             return tiles
@@ -250,14 +254,10 @@ var MinesweeperGame = {
                 var tile = queue.shift()
                 // console.log(queue)
                 if(tile.number == 0) {
-                    tiles = game.get_neighbor_tiles(tile)
-                    // console.log(tiles)
+                    tiles = game.get_neighbor_tiles(tile, is_covered=true)
                     for (var i = 0; i < tiles.length; i = i + 1) {
-                        if(tiles[i].is_cover) {
-                            // console.log(tiles[i])
-                            game.show_tile(tiles[i])
-                            queue.push(tiles[i])
-                        }
+                        game.show_tile(tiles[i])
+                        queue.push(tiles[i])
                     }
                     // await sleep(1);
                 }
@@ -269,8 +269,7 @@ var MinesweeperGame = {
                 // remove flag first
                 if (tile.is_flag) {
                     game.remove_flag(tile)
-                    tile.is_flag = false
-                } else {
+                } else if (tile.is_covered) {
                     if (tile.is_mine) {
                         game.hit_mine = game.hit_mine + 1
                         Crafty.audio.play("ding", 1, game.click_volume);
@@ -285,6 +284,19 @@ var MinesweeperGame = {
                         // game.show_tile(tile)
                         game.bfs_show_tile(tile)
                     }
+                } else {
+
+                    // show flag for neighbor if it's obviously that all uncovered neighbor are mine.
+                    if (tile.number > 0 && tile.number < 9) {
+                        tiles = game.get_neighbor_tiles(tile, is_covered=true)
+                        uncovered_mine_tiles = game.get_neighbor_tiles(tile, is_covered=false).filter(t => t.is_mine)
+                        if (tiles.length + uncovered_mine_tiles.length == tile.number) {
+                            Crafty.audio.play("button_click_on", 1, game.click_volume);
+                            for (var i = 0; i < tiles.length; i = i + 1) {
+                                game.show_flag(tiles[i])
+                            }
+                        }
+                    }
                 }
             })
         }
@@ -292,13 +304,11 @@ var MinesweeperGame = {
         game.set_click_flag = function(e, tile) {
             e.bind('MouseUp', function(e) {
                 if( e.mouseButton == Crafty.mouseButtons.RIGHT ) {
-                    if (tile.is_cover) {
+                    if (tile.is_covered) {
                         if(tile.is_flag) {
                             game.remove_flag(tile)
-                            tile.is_flag = false
                         } else {
                             game.show_flag(tile)
-                            tile.is_flag = true
                         }
                     }
                 }
@@ -319,6 +329,7 @@ var MinesweeperGame = {
                     alpha: 1,
                 })
             }
+            tile.is_flag = true
             if (! silent)
                 Crafty.audio.play("button_click_on", 1, game.click_volume);
         }
@@ -327,6 +338,7 @@ var MinesweeperGame = {
             if(tile.flag_e) {
                 tile.flag_e.alpha = 0
             }
+            tile.is_flag = false
             if (! silent)
                 Crafty.audio.play("button_click_off", 1, game.click_volume);
         }
@@ -401,7 +413,7 @@ var MinesweeperGame = {
                         'cover_e': cover_e,
                         'land_e': land_e,
                         'is_mine': is_mine,
-                        'is_cover': true,
+                        'is_covered': true,
                         'is_flag': false,
                     }
                     if (is_mine) {game.total_mine = game.total_mine + 1}
