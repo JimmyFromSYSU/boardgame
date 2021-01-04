@@ -78,9 +78,8 @@ var MinesweeperGame = {
         game.board = {}
 
         game.bg_color = 'rgb(249,214,179)'
-        screen.orientation.lock('portrait').catch(function(error) {
-        });
-
+        // screen.orientation.lock('portrait').catch(function(error) {
+        // });
         game.release = function () {
             console.log("game.release")
             if (game.grids && game.col && game.row) {
@@ -112,11 +111,13 @@ var MinesweeperGame = {
             game.total_mine = 0
             game.hit_mine = 0
             game.max_hit_mine = 3
-            game.pct_of_mine = 0.12
-
-            game.col = 50
-            game.tile_len =  Math.floor((game.screen_w - game.padding_left - game.padding_right) / game.col)
-
+            game.pct_of_mine = 0.1 + (Math.random() / 10)
+            console.log(`game.pct_of_mine = ${Math.random()}`)
+            // game.col = 50
+            // game.tile_len =  Math.floor((game.screen_w - game.padding_left - game.padding_right) / game.col)
+            // game.row = Math.floor((game.screen_h - game.padding_top - game.padding_bottom) / game.tile_len)
+            game.tile_len = 30
+            game.col = Math.floor((game.screen_w - game.padding_left - game.padding_right) / game.tile_len)
             game.row = Math.floor((game.screen_h - game.padding_top - game.padding_bottom) / game.tile_len)
 
             game.z_level = {
@@ -179,8 +180,6 @@ var MinesweeperGame = {
         }
 
         game.precomp_tile = function(tile, r, c) {
-
-
             if(tile.is_mine) {
                 tile.number = 9
             } else {
@@ -413,14 +412,24 @@ var MinesweeperGame = {
                 game.grids.push(row_grids)
             }
             console.log(`total mine: ${game.total_mine}`)
-            // console.log(game.grids)
         }
 
-        // alert(`${w} * ${h}`)
         game.load_main_scene = function() {
             console.log("game.load_main_scene")
-            // Crafty.load(assets, loaded, progress, error_loading);
-            Crafty.load(assets)
+
+            var loaded = function() {
+            }
+            var progress = function(e) {
+            };
+            var error_loading = function(e) {
+            };
+            // catch audio error
+            try {
+                Crafty.load(assets, loaded, progress, error_loading);
+            } catch (error) {
+                console.error(error);
+            }
+
             game.release()
             game.setup_config()
             game.init_map()
