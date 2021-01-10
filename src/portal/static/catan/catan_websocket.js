@@ -19,11 +19,11 @@ var CatanWebSocket = {
             console.log("==========")
 
             if (data.action == "COMFIRM_BUILD_HOUSE") {
-                game.build_house_action({x: data.x, y: data.y, z: data.z})
+                game.build_house_action({x: data.x, y: data.y, z: data.z}, data.color)
             } else if (data.action == "COMFIRM_BUILD_TOWN") {
-                game.build_town_action({x: data.x, y: data.y, z: data.z})
+                game.build_town_action({x: data.x, y: data.y, z: data.z}, data.color)
             } else if (data.action == "COMFIRM_BUILD_ROAD") {
-                game.build_road_action({x: data.x, y: data.y, z: data.z})
+                game.build_road_action({x: data.x, y: data.y, z: data.z}, data.color)
             } else if (data.action == "COMFIRM_MOVE_ROBBER") {
                 game.move_robber_action({x: data.x, y: data.y});
             } else if (data.action == "COMFIRM_ROLL_DICE") {

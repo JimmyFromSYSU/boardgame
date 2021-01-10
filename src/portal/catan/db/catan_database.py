@@ -22,8 +22,11 @@ def get_constructions(game_id) -> List[Construction]:
     return Construction.objects.filter(game=game_id)
 
 
-def get_construction_by_location(game_id, cx, cy, cz) -> Construction:
-    return Construction.objects.get_or_create(game=game_id, x=cx, y=cy, z=cz)
+def get_construction_by_location(game_id, cx, cy, cz) -> Optional[Construction]:
+    try:
+        return Construction.objects.get(game__id=game_id, x=cx, y=cy, z=cz)
+    except Construction.DoesNotExist:
+        return None
 
 
 def get_houses(game_id, cx, cy) -> List[Construction]:

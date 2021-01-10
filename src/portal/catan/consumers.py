@@ -13,6 +13,10 @@ from .data_layer.api import (
     get_selected_map,
     get_users_config,
 )
+from .logic.state_machine import (
+    GameState,
+    build_house,
+)
 from .logic.catan_controller import CatanBaseController
 
 # from .data_layer.players_data import PLAYERS_DATA
@@ -27,7 +31,9 @@ def obj_to_json(obj):
         separators=(',', ': ')
     )
 
-
+##############################################
+# CatanConsumer
+##############################################
 class CatanConsumer(AsyncConsumer):
     def print_connection_counter(self):
         print(">>>>>>>>>>>>>>>>>>>>>>> INFO: connection_counter")
@@ -45,6 +51,10 @@ class CatanConsumer(AsyncConsumer):
             '1': {
                 'name': '智',
                 'sprite': 'player_id_1', # TODO: migrate to image path
+            },
+            '2': {
+                'name': '时涛',
+                'sprite': 'player_id_2',
             },
             '3': {
                 'name': '今',
@@ -153,26 +163,22 @@ class CatanConsumer(AsyncConsumer):
 
             if "game_id" in data:
                 game_id = int(data["game_id"])
-                self.print_event("game_id", game_id)
+                # self.print_event("game_id", game_id)
 
             if "user_id" in data:
                 user_id = int(data["user_id"])
-                self.print_event("user_id", user_id)
+                # self.print_event("user_id", user_id)
 
             if "action" in data:
                 if data['action'] == "BUILD_HOUSE":
-                    response = {
-                        'action': 'COMFIRM_BUILD_HOUSE',
-                        'x': data['x'],
-                        'y': data['y'],
-                        'z': data['z'],
-                    }
+                    response = await build_house(game_id, data)
                 elif data['action'] == "BUILD_TOWN":
                     response = {
                         'action': 'COMFIRM_BUILD_TOWN',
                         'x': data['x'],
                         'y': data['y'],
                         'z': data['z'],
+                        'color': data['color'],
                     }
                 elif data['action'] == "BUILD_ROAD":
                     response = {
@@ -180,6 +186,7 @@ class CatanConsumer(AsyncConsumer):
                         'x': data['x'],
                         'y': data['y'],
                         'z': data['z'],
+                        'color': data['color'],
                     }
                 elif data['action'] == "MOVE_ROBBER":
                     response = {
@@ -246,9 +253,9 @@ class CatanConsumer(AsyncConsumer):
         })
 
 
-
-
-
+##############################################
+# CatanRoomConsumer
+##############################################
 class CatanRoomConsumer(AsyncConsumer):
     def print_id(self, room_id, user_id):
         print(">>>>>>>>>>>>>>>>>>>>>>> INFO: id")
@@ -277,11 +284,15 @@ class CatanRoomConsumer(AsyncConsumer):
         map_name = get_selected_map(room_id)
         users_config = get_users_config(room_id)
         user_colors = {int(_id): user_config['color'] for _id, user_config in users_config.items()}
-        self.print_event("input map_name", map_name)
-        self.print_event("input user_colors", obj_to_json(user_colors))
-        user_info = controller.initial_game(map_name, user_colors)
-        self.print_event("return user info", obj_to_json(user_info))
-        return user_info['game_id']
+
+        # self.print_event("input map_name", map_name)
+        # self.print_event("input user_colors", obj_to_json(user_colors))
+
+        game_info = controller.initial_game(map_name, user_colors)
+        controller.change_game_state(game_info['game_id'], GameState.SETTLE_HOUSE)
+        # self.print_event("return user info", obj_to_json(user_info))
+
+        return game_info['game_id']
 
     async def websocket_receive(self, event):
         # TODO: Before the state machine, add a lock to protect the states.

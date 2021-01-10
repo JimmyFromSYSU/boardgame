@@ -260,9 +260,11 @@ var CatanGame = {
                             data = JSON.stringify({
                                 'action': 'BUILD_TOWN',
                                 'game_id': game.id,
+                                'user_id': game.player.id,
                                 'x': point.x,
                                 'y': point.y,
                                 'z': point.z,
+                                'color': game.player.color,
                             });
                             game.socket.send(data);
                         }
@@ -277,9 +279,11 @@ var CatanGame = {
                         data = JSON.stringify({
                             'action': 'BUILD_HOUSE',
                             'game_id': game.id,
+                            'user_id': game.player.id,
                             'x': point.x,
                             'y': point.y,
                             'z': point.z,
+                            'color': game.player.color,
                         });
                         game.socket.send(data);
                     }
@@ -302,9 +306,11 @@ var CatanGame = {
                         data = JSON.stringify({
                             'action': 'BUILD_ROAD',
                             'game_id': game.id,
+                            'user_id': game.player.id,
                             'x': edge.x,
                             'y': edge.y,
                             'z': edge.z,
+                            'color': game.player.color,
                         });
                         game.socket.send(data);
                     }

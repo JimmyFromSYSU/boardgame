@@ -123,10 +123,21 @@ class CatanBaseController:
     # Note
     # 在指定位置放置Construction，并删除旧的Construction
     def place_construction(self, game_id, user_id, cx, cy, cz, ctype: str) -> bool:
+        print(f"game_id = {game_id}, user_id = {user_id}, cx = {cx}, cy = {cy}, cz = {cz}, ctype = {ctype}")
         player = get_player_by_user_id(game_id, user_id)
         construction = get_construction_by_location(game_id, cx, cy, cz)
-        construction.owner = player
-        construction.type = ctype
+        if construction:
+            construction.owner = player
+            construction.type = ctype
+        else:
+            construction = Construction(
+                game = get_game(game_id),
+                x = cx,
+                y = cy,
+                z = cz,
+                owner = player,
+                type = ctype,
+            )
         construction.save_all()
         return True
 
@@ -247,6 +258,9 @@ class CatanBaseController:
         tiles = get_tiles(game_id)
         map_name = get_game_map_name(game_id)
         constructions = get_constructions(game_id)
+        # for construction in constructions:
+        #     construction.owner_id = construction.owner.user_id
+        #     construction.color = construction.owner.color
 
         map_resource = {
                         'map_name': map_name,
@@ -280,7 +294,7 @@ class CatanBaseController:
     def change_game_state(self, game_id, state: str) -> bool:
         game = get_game(game_id)
         game.state = state
-        game.save_all
+        game.save_all()
         return True
 
     # 返回指定玩家建造的欧几里得路径长度
