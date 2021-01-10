@@ -263,9 +263,16 @@ class CatanBaseController:
         #     construction.color = construction.owner.color
 
         map_resource = {
-                        'map_name': map_name,
-                        'tiles': [model_to_dict(tile) for tile in tiles],
-                        'constructions': [model_to_dict(construction) for construction in constructions]}
+            'map_name': map_name,
+            'tiles': [model_to_dict(tile) for tile in tiles],
+            'constructions': [
+                {
+                    **model_to_dict(construction),
+                    'owner_player_id': construction.owner.user_id,
+                    'color': construction.owner.color,
+                } for construction in constructions
+            ]
+        }
 
         return map_resource
 

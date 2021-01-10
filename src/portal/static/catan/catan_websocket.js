@@ -36,6 +36,7 @@ var CatanWebSocket = {
 
                     // load data
                     load_map_data_to_game(map_data.map_name, map_data.tiles, game)
+                    load_consturction_data_to_game(map_data.constructions, game)
                     load_bank_data_to_game(bank_data, game)
                     load_game_data_to_game(game_data, game)
                     game.board.cards = data.handcard_data

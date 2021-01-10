@@ -23,6 +23,7 @@ var catan_load_build = function(game) {
             y: center.y - h/2,
             z: 3,
             alpha: 1,
+            player_color: color,
             w: w,
             h: h,
         }).origin('center');
@@ -58,6 +59,7 @@ var catan_load_build = function(game) {
             y: center.y - h/2,
             z: 4,
             alpha: 1,
+            player_color: color,
             w: w,
             h: h,
         })
@@ -87,6 +89,7 @@ var catan_load_build = function(game) {
             y: center.y - h * 3 / 4,
             z: 5,
             alpha: 1,
+            player_color: color,
             w: w * 1.4,
             h: h * 1.4,
         })
@@ -108,6 +111,14 @@ var catan_load_build = function(game) {
 }
 
 
-load_map_data_to_game = function(constructions, game) {
-
+load_consturction_data_to_game = function(constructions, game) {
+    constructions.forEach(c => {
+        if (c.type == "HS") {
+            game.build_house({x: c.x, y: c.y, z: c.z}, c.color)
+        } else if (c.type == "TN") {
+            game.build_town({x: c.x, y: c.y, z: c.z}, c.color)
+        } else if(c.type == "RD") {
+            game.build_road({x: c.x, y: c.y, z: c.z}, c.color)
+        }
+    })
 }

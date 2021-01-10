@@ -230,6 +230,8 @@ class CatanConsumer(AsyncConsumer):
                         'game_data': game_data,
                         'handcard_data': handcard_data,
                     }
+                    self.print_event("constructions", obj_to_json(map_data['constructions']))
+
             elif "message" in data:
                 # print(f"message is: {data['message']}")
                 response = {

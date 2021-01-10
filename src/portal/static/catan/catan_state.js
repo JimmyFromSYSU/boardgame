@@ -4,9 +4,14 @@ var catan_load_state = function(game) {
         return false
     }
 
-    game.can_build_road = function() {
+    game.can_build_road = function(edge_loc) {
+        console.log(`state: ${game.state}, curr_player:${game.current_player_id} player_id: ${game.player.id}`)
         if (game.state == 'SETTLE_ROAD' && game.current_player_id.toString() == game.player.id) {
-            return true
+            if (edge_loc) {
+                return true
+            } else {
+                return true
+            }
         }
         return false
     }

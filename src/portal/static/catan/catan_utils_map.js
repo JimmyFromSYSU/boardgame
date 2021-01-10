@@ -127,6 +127,31 @@ var catan_load_utils_for_map = function(game) {
     // 计算与某个tile相邻的所有点
     // 计算与某个tile相邻的所有边
     // 计算与某个点相邻的所有边
+    // 计算与某个边相邻的所有边
+    game.get_adjacent_edges_from_edge = function (location) {
+
+    }
     // 计算与某个边相邻的所有点
+    game.get_adjacent_points_from_edge = function(location) {
+        var points = []
+        var push_point_by_xyz = function(x, y, z) {
+            var loc = {x: x, y: y, z: z};
+            var pid = game.get_point_id(loc);
+            var point = game.get_point(pid)
+            if (point) {points.push(point);}
+        }
+        if (location.y % 2 == 0) {dx = -1} else {dx = 0}
+        if (location.z == -1) {
+            push_point_by_xyz(location.x, location.y, -1)
+            push_point_by_xyz(location.x + dx, location.y - 1, 1)
+        } else if (location.z == 0) {
+            push_point_by_xyz(location.x + dx, location.y - 1, 1)
+            push_point_by_xyz(location.x + dx, location.y + 1, -1)
+        } else if (location.z == 1) {
+            push_point_by_xyz(location.x + dx, location.y + 1, -1)
+            push_point_by_xyz(location.x, location.y, 1)
+        }
+        return points
+    }
     return game
 }
